@@ -1,4 +1,5 @@
 # cashflow-frontend
+<<<<<<< HEAD
 
 This template should help get you started developing with Vue 3 in Vite.
 
@@ -36,3 +37,6 @@ npm run dev
 ```sh
 npm run build
 ```
+=======
+Frontend der Cashflow App (Vue.js)
+>>>>>>> 7d3b758bdde762a87ed8b54b5cac95cfdb148260
