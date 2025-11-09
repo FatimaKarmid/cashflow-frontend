@@ -1,11 +1,20 @@
-<script setup></script>
-
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div id="app">
+    <h1>Cashflow App</h1>
+    <ExpenseList />
+  </div>
 </template>
 
-<style scoped></style>
+<script>
+import ExpenseList from './components/ExpenseList.vue'
+
+export default {
+  components: { ExpenseList }
+}
+</script>
+
+<style scoped>
+h1 {
+  color: #333;
+}
+</style>
