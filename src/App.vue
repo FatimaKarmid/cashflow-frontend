@@ -1,9 +1,4 @@
 <template>
-<<<<<<< HEAD
-  <div id="app">
-    <h1>Cashflow App</h1>
-    <ExpenseList />
-=======
   <div>
     <h2>Ausgabenübersicht</h2>
     <ul>
@@ -36,28 +31,15 @@
 
       <button type="submit">Hinzufügen</button>
     </form>
->>>>>>> 685e666 (Hinzufügt: Formular für neue Ausgaben)
   </div>
 </template>
 
 <script>
-<<<<<<< HEAD
-import ExpenseList from './components/ExpenseList.vue'
-
-export default {
-  components: { ExpenseList }
-}
-</script>
-
-<style scoped>
-h1 {
-  color: #333;
-=======
 export default {
   name: "App",
   data() {
     return {
-      expenses: [],
+      expenses: [], // Für die Liste der Ausgaben
       newTransaction: {
         betrag: null,
         verwendungszweck: "Lebensmittel",
@@ -67,9 +49,10 @@ export default {
     };
   },
   mounted() {
-    this.fetchExpenses();
+    this.fetchExpenses(); // Initiale Ausgaben laden
   },
   methods: {
+    // Holt alle Ausgaben
     fetchExpenses() {
       fetch('https://cashflow-6.onrender.com/auszahlungen')
           .then(response => response.json())
@@ -90,8 +73,8 @@ export default {
           .then(response => response.json())
           .then(data => {
             alert('Transaktion hinzugefügt!');
-            this.fetchExpenses();
-            this.newTransaction = { betrag: null, verwendungszweck: "Lebensmittel", datum: "", notiz: "" };
+            this.fetchExpenses(); // Nach dem Hinzufügen die Ausgaben neu laden
+            this.newTransaction = { betrag: null, verwendungszweck: "Lebensmittel", datum: "", notiz: "" }; // Formular zurücksetzen
           })
           .catch(error => {
             console.error('Fehler beim Hinzufügen der Transaktion:', error);
@@ -119,6 +102,5 @@ button {
   color: white;
   border: none;
   cursor: pointer;
->>>>>>> 685e666 (Hinzufügt: Formular für neue Ausgaben)
 }
 </style>
