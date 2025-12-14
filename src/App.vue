@@ -4,6 +4,11 @@
     <ul>
       <li v-for="expense in expenses" :key="expense.id">
         💰 {{ expense.betrag }} € – {{ expense.verwendungszweck }} am {{ expense.datum }}
+        <br>
+        Kategorie: {{ expense.verwendungszweck }} <br>
+        Notiz: {{ expense.notiz }}
+        <!-- Button zum Löschen der Transaktion -->
+        <button @click="deleteTransaction(expense.id)">Löschen</button>
       </li>
     </ul>
 
@@ -33,7 +38,6 @@
     </form>
   </div>
 </template>
-
 <script>
 export default {
   name: "App",
@@ -61,6 +65,7 @@ export default {
           })
           .catch(error => console.error('Fehler beim Laden der Ausgaben:', error));
     },
+
     // Schickt die neue Transaktion ans Backend
     submitTransaction() {
       fetch('https://cashflow-6.onrender.com/auszahlungen', {
@@ -79,11 +84,28 @@ export default {
           .catch(error => {
             console.error('Fehler beim Hinzufügen der Transaktion:', error);
           });
+    },
+
+    // Löscht eine Transaktion basierend auf der ID
+    deleteTransaction(id) {
+      fetch(`https://cashflow-6.onrender.com/auszahlungen/${id}`, {
+        method: 'DELETE',
+      })
+          .then(response => {
+            if (response.ok) {
+              this.fetchExpenses(); // Nach dem Löschen die Ausgaben neu laden
+              alert('Transaktion gelöscht');
+            } else {
+              alert('Fehler beim Löschen der Transaktion');
+            }
+          })
+          .catch(error => {
+            console.error('Fehler beim Löschen der Transaktion:', error);
+          });
     }
   }
 };
 </script>
-
 <style scoped>
 form {
   display: flex;
@@ -102,5 +124,8 @@ button {
   color: white;
   border: none;
   cursor: pointer;
+}
+button {
+  background-color: #e74c3c;
 }
 </style>
