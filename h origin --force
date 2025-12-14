@@ -1,0 +1,72 @@
+[33mcommit 84984425704485768473f9fd5b755b571d6f74e6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Sat Dec 13 10:08:27 2025 +0100
+
+    Commit
+
+[33mcommit 0232aa091a247f2bc00c9857a511784a1033a186[m
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Fri Dec 12 14:08:41 2025 +0100
+
+    Remove .env from repository and update .gitignore
+
+[33mcommit 92de32974d6813bb1529dedb2c5991fc119de9d3[m
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Fri Dec 12 10:15:28 2025 +0100
+
+    Frontend update
+
+[33mcommit 3aa704e4fb81fa0fd74a3aa6e12e0f649018e980[m
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Fri Dec 12 10:11:37 2025 +0100
+
+    Add .env to .gitignore
+
+[33mcommit af6b3e57c74df97b1ff8157fb41356f8726e6425[m
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Fri Dec 12 10:03:08 2025 +0100
+
+    E
+
+[33mcommit 471aece57d72cf389bfd0038ceba8bc2f2033a63[m
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Fri Dec 12 09:56:26 2025 +0100
+
+    Hinzufügt: Formular für neue Ausgaben
+
+[33mcommit 6c0a9f8e72633fac8b5ee4c8839452a964015243[m
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Fri Dec 12 09:41:09 2025 +0100
+
+    L
+
+[33mcommit 081c1da78e5db46099d0319e67d442e47baf071f[m
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Fri Dec 12 09:43:09 2025 +0100
+
+    F
+
+[33mcommit 1257af1442843060efae2753cc488f2a8fd39c32[m
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Sun Nov 9 07:46:41 2025 +0100
+
+    Vue.js-App mit Unterkomponent
+
+[33mcommit 9cc41992275b364af2b8599219ead1d717fcbbce[m
+Merge: c4782bc b69ca82
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Sat Nov 8 11:49:34 2025 +0100
+
+    Resolve README merge conflict
+
+[33mcommit b69ca820b39f1e2dabb452f9d4969b522fe723ec[m
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Sat Nov 8 11:44:53 2025 +0100
+
+    Initial commit
+
+[33mcommit c4782bcb762e923340c4d983397352230aa38c7a[m
+Author: FatimaKarmid <Fatima.Karmid@Student.HTW-Berlin.de>
+Date:   Sat Nov 8 11:41:15 2025 +0100
+
+    Initial Vue project for Cashflow App (M2)
