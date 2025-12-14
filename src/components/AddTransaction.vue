@@ -3,10 +3,10 @@
     <h2>Neue Ausgabe hinzufügen</h2>
     <form @submit.prevent="submitTransaction">
       <label for="betrag">Betrag:</label>
-      <input type="number" id="betrag" v-model="newTransaction.betrag" required />
+      <input type="number" v-model="newTransaction.amount" id="betrag" required />
 
       <label for="verwendungszweck">Kategorie:</label>
-      <select id="verwendungszweck" v-model="newTransaction.category" required>
+      <select v-model="newTransaction.category" id="verwendungszweck" required>
         <option value="Lebensmittel">Lebensmittel</option>
         <option value="Kleidung">Kleidung</option>
         <option value="Fahrtkosten">Fahrtkosten</option>
@@ -17,10 +17,10 @@
       </select>
 
       <label for="datum">Datum:</label>
-      <input type="date" id="datum" v-model="newTransaction.datum" required />
+      <input type="date" v-model="newTransaction.date" id="datum" required />
 
       <label for="notiz">Notiz:</label>
-      <textarea id="notiz" v-model="newTransaction.notiz"></textarea>
+      <textarea v-model="newTransaction.note" id="notiz"></textarea>
 
       <button type="submit">Hinzufügen</button>
     </form>
@@ -32,32 +32,16 @@ export default {
   name: "App",
   data() {
     return {
-      expenses: [], // Für die Liste der Ausgaben
       newTransaction: {
-        betrag: null,
-        verwendungszweck: "Lebensmittel", // Standardwert
-        datum: "",
-        notiz: ""
+        amount: null,
+        category: 'Lebensmittel', // Standardwert für Kategorie
+        date: '',
+        note: ''
       }
     };
   },
-  mounted() {
-    this.fetchExpenses(); // Initiale Ausgaben laden
-  },
   methods: {
-    // Holt alle Ausgaben
-    fetchExpenses() {
-      fetch('https://cashflow-6.onrender.com/auszahlungen')
-          .then(response => response.json())
-          .then(data => {
-            this.expenses = data;
-          })
-          .catch(error => console.error('Fehler beim Laden der Ausgaben:', error));
-    },
-
-    // Schickt die neue Transaktion ans Backend
     submitTransaction() {
-      // Mapping der Kategorien auf die entsprechenden Integer-Werte
       const categoryMap = {
         "Lebensmittel": 1,
         "Kleidung": 2,
@@ -68,29 +52,33 @@ export default {
         "Sonstiges": 7
       };
 
-      // Die POST-Anfrage an den Server senden
+      const zahlungsartMap = {
+        "BAR": 1,
+        "KARTE": 2,
+        "ÜBERWEISUNG": 3,
+        "LASTSCHRIFT": 4,
+        "SONSTIGES": 5
+      };
+
       fetch('https://cashflow-6.onrender.com/auszahlungen', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          betrag: this.newTransaction.betrag,
-          datum: this.newTransaction.datum,
-          zahlungsart: "KARTE", // Du kannst den Zahlungsart-Wert auch dynamisch setzen, wenn nötig
-          verwendungszweck: categoryMap[this.newTransaction.category], // Hier wird der Integer-Wert gesendet
-          notiz: this.newTransaction.notiz
+          betrag: this.newTransaction.amount,
+          datum: this.newTransaction.date,
+          zahlungsart: zahlungsartMap["KARTE"],  // Hier wird der Integer-Wert verwendet (für jetzt statisch auf "KARTE" gesetzt)
+          verwendungszweck: categoryMap[this.newTransaction.category],
+          notiz: this.newTransaction.note
         })
       })
           .then(response => response.json())
           .then(data => {
-            alert('Transaktion hinzugefügt!');
-            this.fetchExpenses(); // Nach dem Hinzufügen die Ausgaben neu laden
-            this.newTransaction = { betrag: null, category: 'Lebensmittel', datum: '', notiz: '' }; // Formular zurücksetzen
+            alert('Transaktion hinzugefügt');
+            this.newTransaction = { amount: null, category: 'Lebensmittel', date: '', note: '' };  // Formular zurücksetzen
           })
-          .catch(error => {
-            console.error('Fehler beim Hinzufügen der Transaktion:', error);
-          });
+          .catch(error => console.error('Fehler beim Hinzufügen der Transaktion:', error));
     }
   }
 };
