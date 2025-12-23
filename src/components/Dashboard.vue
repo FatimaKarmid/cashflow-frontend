@@ -5,6 +5,16 @@
     <label>Datum auswählen:</label>
     <input type="date" v-model="selectedDate" @change="loadSumme" />
 
+    <label>Monat:</label>
+    <input type="number" v-model="monat" min="1" max="12">
+
+    <label>Jahr:</label>
+    <input type="number" v-model="jahr">
+
+    <button @click="loadMonatSumme">Berechnen</button>
+
+    <p><strong>Summe Monat:</strong> {{ monatsSumme }} €</p>
+
     <div class="card">
       <h3>Gesamtausgaben am Tag</h3>
       <p class="amount">{{ summe }} €</p>
@@ -59,4 +69,18 @@ export default {
   font-weight: bold;
   color: #42b983;
 }
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
 </style>

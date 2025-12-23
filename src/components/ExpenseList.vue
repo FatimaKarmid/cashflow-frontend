@@ -2,6 +2,22 @@
   <div class="container">
     <h2>Ausgabenübersicht</h2>
 
+    <!-- FILTER -->
+    <div class="filter">
+      <label for="kategorie">Kategorie filtern:</label>
+      <select id="kategorie" v-model="selectedKategorie" @change="filterExpenses">
+        <option value="">Alle</option>
+        <option value="LEBENSMITTEL">Lebensmittel</option>
+        <option value="KLEIDUNG">Kleidung</option>
+        <option value="FAHRTKOSTEN">Fahrtkosten</option>
+        <option value="MIETE">Miete</option>
+        <option value="FREIZEIT">Freizeit</option>
+        <option value="GESUNDHEIT">Gesundheit</option>
+        <option value="SONSTIGES">Sonstiges</option>
+      </select>
+    </div>
+
+    <!-- LISTE -->
     <ul v-if="expenses.length">
       <li v-for="expense in expenses" :key="expense.id" class="expense-item">
         <div>
@@ -37,18 +53,20 @@ export default {
   name: 'AusgabenListe',
   data() {
     return {
-      expenses: []
+      expenses: [],
+      selectedKategorie: ""
     };
   },
   mounted() {
     this.fetchExpenses();
   },
   methods: {
-    // Wandelt Zahl in Text um
+    // Zahl → Text
     verwendungszweckText(value) {
       return verwendungszweckMap[value] || "Unbekannt";
     },
 
+    // Alle laden
     fetchExpenses() {
       fetch('https://cashflow-6.onrender.com/auszahlungen')
           .then(response => response.json())
@@ -60,6 +78,24 @@ export default {
           );
     },
 
+    // Filter nach Kategorie
+    filterExpenses() {
+      if (!this.selectedKategorie) {
+        this.fetchExpenses();
+        return;
+      }
+
+      fetch(`https://cashflow-6.onrender.com/auszahlungen/filter?kategorie=${this.selectedKategorie}`)
+          .then(response => response.json())
+          .then(data => {
+            this.expenses = data;
+          })
+          .catch(error =>
+              console.error('Fehler beim Filtern:', error)
+          );
+    },
+
+    // Löschen
     deleteTransaction(id) {
       fetch(`https://cashflow-6.onrender.com/auszahlungen/${id}`, {
         method: 'DELETE'
@@ -83,6 +119,15 @@ export default {
 .container {
   max-width: 700px;
   margin: 0 auto;
+}
+
+.filter {
+  margin-bottom: 20px;
+}
+
+select {
+  padding: 6px;
+  margin-left: 10px;
 }
 
 ul {
