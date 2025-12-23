@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Dashboard from '../views/Dashboard.vue'
-import AusgabenListe from '../views/AusgabenListe.vue'
-import AusgabeHinzufuegen from '../views/AusgabeHinzufuegen.vue'
+
+import Dashboard from '../components/Dashboard.vue'
+import AusgabenListe from '../components/ExpenseList.vue'
+import AusgabeHinzufuegen from '../components/AddTransaction.vue'
 
 const routes = [
     { path: '/', component: Dashboard },
