@@ -6,7 +6,7 @@
       <li v-for="expense in expenses" :key="expense.id" class="expense-item">
         <div>
           <strong>💰 {{ expense.betrag }} €</strong><br>
-          Kategorie: {{ expense.verwendungszweck }}<br>
+          Kategorie: {{ verwendungszweckText(expense.verwendungszweck) }}<br>
           Datum: {{ expense.datum }}<br>
           <span v-if="expense.notiz">Notiz: {{ expense.notiz }}</span>
         </div>
@@ -22,6 +22,17 @@
 </template>
 
 <script>
+// Mapping: Integer aus Backend → lesbarer Text
+const verwendungszweckMap = {
+  1: "Lebensmittel",
+  2: "Kleidung",
+  3: "Fahrtkosten",
+  4: "Miete",
+  5: "Freizeit",
+  6: "Gesundheit",
+  7: "Sonstiges"
+};
+
 export default {
   name: 'AusgabenListe',
   data() {
@@ -33,6 +44,11 @@ export default {
     this.fetchExpenses();
   },
   methods: {
+    // Wandelt Zahl in Text um
+    verwendungszweckText(value) {
+      return verwendungszweckMap[value] || "Unbekannt";
+    },
+
     fetchExpenses() {
       fetch('https://cashflow-6.onrender.com/auszahlungen')
           .then(response => response.json())
