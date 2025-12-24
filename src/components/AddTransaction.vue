@@ -19,13 +19,13 @@
           v-model="newTransaction.category"
           required
       >
-        <option value="Lebensmittel">Lebensmittel</option>
-        <option value="Kleidung">Kleidung</option>
-        <option value="Fahrtkosten">Fahrtkosten</option>
-        <option value="Miete">Miete</option>
-        <option value="Freizeit">Freizeit</option>
-        <option value="Gesundheit">Gesundheit</option>
-        <option value="Sonstiges">Sonstiges</option>
+        <option>Lebensmittel</option>
+        <option>Kleidung</option>
+        <option>Fahrtkosten</option>
+        <option>Miete</option>
+        <option>Freizeit</option>
+        <option>Gesundheit</option>
+        <option>Sonstiges</option>
       </select>
 
       <label for="datum">Datum</label>
@@ -43,7 +43,11 @@
           placeholder="Optional"
       ></textarea>
 
-      <button type="submit">Ausgabe speichern</button>
+      <button type="submit" :disabled="loading">
+        {{ loading ? "Speichern..." : "Ausgabe speichern" }}
+      </button>
+
+      <p v-if="error" class="error">{{ error }}</p>
     </form>
   </div>
 </template>
@@ -53,6 +57,8 @@ export default {
   name: "AusgabeHinzufuegen",
   data() {
     return {
+      loading: false,
+      error: null,
       newTransaction: {
         amount: null,
         category: "Lebensmittel",
@@ -63,6 +69,9 @@ export default {
   },
   methods: {
     submitTransaction() {
+      this.error = null;
+      this.loading = true;
+
       const categoryMap = {
         Lebensmittel: 1,
         Kleidung: 2,
@@ -73,14 +82,6 @@ export default {
         Sonstiges: 7
       };
 
-      const zahlungsartMap = {
-        BAR: 1,
-        KARTE: 2,
-        UEBERWEISUNG: 3,
-        LASTSCHRIFT: 4,
-        SONSTIGES: 5
-      };
-
       fetch("https://cashflow-6.onrender.com/auszahlungen", {
         method: "POST",
         headers: {
@@ -89,19 +90,20 @@ export default {
         body: JSON.stringify({
           betrag: this.newTransaction.amount,
           datum: this.newTransaction.date,
-          zahlungsart: zahlungsartMap.KARTE,
+          zahlungsart: 1, // KARTE
           verwendungszweck: categoryMap[this.newTransaction.category],
           notiz: this.newTransaction.note
         })
       })
-          .then(response => {
+          .then(async response => {
+            const text = await response.text();
             if (!response.ok) {
-              throw new Error("Fehler beim Speichern");
+              throw new Error(text || "Fehler beim Speichern");
             }
-            return response.json();
+            return text;
           })
           .then(() => {
-            alert("Ausgabe erfolgreich gespeichert");
+            alert("✅ Ausgabe erfolgreich gespeichert");
             this.newTransaction = {
               amount: null,
               category: "Lebensmittel",
@@ -109,9 +111,13 @@ export default {
               note: ""
             };
           })
-          .catch(error =>
-              console.error("Fehler beim Hinzufügen der Transaktion:", error)
-          );
+          .catch(err => {
+            console.error(err);
+            this.error = err.message;
+          })
+          .finally(() => {
+            this.loading = false;
+          });
     }
   }
 };
@@ -119,7 +125,7 @@ export default {
 
 <style scoped>
 .container {
-  max-width: 400px;
+  max-width: 420px;
   margin: 0 auto;
 }
 
@@ -152,7 +158,14 @@ button {
   border-radius: 6px;
 }
 
-button:hover {
-  background-color: #369b6e;
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error {
+  margin-top: 12px;
+  color: #e74c3c;
+  font-weight: 600;
 }
 </style>
