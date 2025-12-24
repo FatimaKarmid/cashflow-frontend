@@ -4,8 +4,8 @@
 
     <!-- FILTER -->
     <div class="filter">
-      <label for="kategorie">Kategorie filtern:</label>
-      <select id="kategorie" v-model="selectedKategorie" @change="filterExpenses">
+      <label for="kategorie">Kategorie:</label>
+      <select id="kategorie" v-model="selectedKategorie" @change="applyFilter">
         <option value="">Alle</option>
         <option value="LEBENSMITTEL">Lebensmittel</option>
         <option value="KLEIDUNG">Kleidung</option>
@@ -15,6 +15,9 @@
         <option value="GESUNDHEIT">Gesundheit</option>
         <option value="SONSTIGES">Sonstiges</option>
       </select>
+
+      <label for="datum">Datum:</label>
+      <input id="datum" type="date" v-model="selectedDate" @change="applyFilter" />
     </div>
 
     <!-- LISTE -->
@@ -50,11 +53,12 @@ const verwendungszweckMap = {
 };
 
 export default {
-  name: 'AusgabenListe',
+  name: "AusgabenListe",
   data() {
     return {
       expenses: [],
-      selectedKategorie: ""
+      selectedKategorie: "",
+      selectedDate: ""
     };
   },
   mounted() {
@@ -68,47 +72,51 @@ export default {
 
     // Alle laden
     fetchExpenses() {
-      fetch('https://cashflow-6.onrender.com/auszahlungen')
-          .then(response => response.json())
+      fetch("https://cashflow-6.onrender.com/auszahlungen")
+          .then(res => res.json())
           .then(data => {
             this.expenses = data;
           })
-          .catch(error =>
-              console.error('Fehler beim Laden der Ausgaben:', error)
+          .catch(err =>
+              console.error("Fehler beim Laden der Ausgaben:", err)
           );
     },
 
-    // Filter nach Kategorie
-    filterExpenses() {
-      if (!this.selectedKategorie) {
-        this.fetchExpenses();
-        return;
+    // Kombinierter Filter
+    applyFilter() {
+      // Priorität: Datum > Kategorie
+      let url = "https://cashflow-6.onrender.com/auszahlungen";
+
+      if (this.selectedDate) {
+        url = `${url}?datum=${this.selectedDate}`;
+      } else if (this.selectedKategorie) {
+        url = `${url}/filter?kategorie=${this.selectedKategorie}`;
       }
 
-      fetch(`https://cashflow-6.onrender.com/auszahlungen/filter?kategorie=${this.selectedKategorie}`)
-          .then(response => response.json())
+      fetch(url)
+          .then(res => res.json())
           .then(data => {
             this.expenses = data;
           })
-          .catch(error =>
-              console.error('Fehler beim Filtern:', error)
+          .catch(err =>
+              console.error("Fehler beim Filtern:", err)
           );
     },
 
     // Löschen
     deleteTransaction(id) {
       fetch(`https://cashflow-6.onrender.com/auszahlungen/${id}`, {
-        method: 'DELETE'
+        method: "DELETE"
       })
           .then(response => {
             if (response.ok) {
-              this.fetchExpenses();
+              this.applyFilter(); // Filter beibehalten
             } else {
-              alert('Fehler beim Löschen');
+              alert("Fehler beim Löschen");
             }
           })
-          .catch(error =>
-              console.error('Fehler beim Löschen der Ausgabe:', error)
+          .catch(err =>
+              console.error("Fehler beim Löschen:", err)
           );
     }
   }
@@ -122,12 +130,16 @@ export default {
 }
 
 .filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
-select {
+select,
+input {
   padding: 6px;
-  margin-left: 10px;
+  font-size: 0.95rem;
 }
 
 ul {

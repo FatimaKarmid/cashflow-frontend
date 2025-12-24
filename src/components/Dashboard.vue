@@ -2,85 +2,112 @@
   <div class="container">
     <h2>Dashboard</h2>
 
-    <label>Datum auswählen:</label>
-    <input type="date" v-model="selectedDate" @change="loadSumme" />
+    <div class="dashboard-grid">
+      <!-- SUMME PRO TAG -->
+      <div class="card">
+        <h3>Ausgaben pro Tag</h3>
+        <input type="date" v-model="selectedDate" @change="loadTagSumme" />
+        <p class="amount">{{ tagSumme }} €</p>
+      </div>
 
-    <label>Monat:</label>
-    <input type="number" v-model="monat" min="1" max="12">
+      <!-- SUMME PRO MONAT -->
+      <div class="card">
+        <h3>Ausgaben pro Monat</h3>
 
-    <label>Jahr:</label>
-    <input type="number" v-model="jahr">
+        <div class="row">
+          <input type="number" min="1" max="12" v-model.number="monat" />
+          <input type="number" v-model.number="jahr" />
+        </div>
 
-    <button @click="loadMonatSumme">Berechnen</button>
+        <button @click="loadMonatDaten">Berechnen</button>
 
-    <p><strong>Summe Monat:</strong> {{ monatsSumme }} €</p>
+        <p class="amount">{{ monatSumme }} €</p>
+      </div>
 
-    <div class="card">
-      <h3>Gesamtausgaben am Tag</h3>
-      <p class="amount">{{ summe }} €</p>
+      <!-- CHART -->
+      <div class="card">
+        <h3>Ausgaben nach Kategorie</h3>
+        <canvas ref="chart"></canvas>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { Chart } from "chart.js/auto";
+
 export default {
   name: "Dashboard",
   data() {
     return {
       selectedDate: "",
-      summe: 0
+      tagSumme: 0,
+
+      monat: new Date().getMonth() + 1,
+      jahr: new Date().getFullYear(),
+      monatSumme: 0,
+
+      chart: null
     };
   },
   methods: {
-    loadSumme() {
+    // TAG
+    loadTagSumme() {
       if (!this.selectedDate) return;
 
-      fetch(
-          `https://cashflow-6.onrender.com/auszahlungen/summe?datum=${this.selectedDate}`
-      )
-          .then(response => response.json())
+      fetch(`https://cashflow-6.onrender.com/auszahlungen/summe?datum=${this.selectedDate}`)
+          .then(res => res.json())
           .then(data => {
-            this.summe = data;
-          })
-          .catch(err =>
-              console.error("Fehler beim Laden der Summe:", err)
-          );
+            this.tagSumme = data;
+          });
+    },
+
+    // MONAT + CHART  ⬅️ HIER GEHÖRT DER CHART-FETCH HIN
+    loadMonatDaten() {
+      // Summe pro Monat
+      fetch(`https://cashflow-6.onrender.com/auszahlungen/summe-monat?monat=${this.monat}&jahr=${this.jahr}`)
+          .then(res => res.json())
+          .then(data => {
+            this.monatSumme = data;
+          });
+
+      // Chart-Daten
+      fetch(`https://cashflow-6.onrender.com/auszahlungen/chart?monat=${this.monat}&jahr=${this.jahr}`)
+          .then(res => res.json())
+          .then(data => {
+            this.loadChart(data);
+          });
+    },
+
+    // Chart zeichnen
+    loadChart(data) {
+      const ctx = this.$refs.chart;
+
+      if (this.chart) {
+        this.chart.destroy();
+      }
+
+      this.chart = new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: Object.keys(data),
+          datasets: [
+            {
+              data: Object.values(data),
+              backgroundColor: [
+                "#42b983",
+                "#3498db",
+                "#f39c12",
+                "#9b59b6",
+                "#e74c3c",
+                "#1abc9c",
+                "#95a5a6"
+              ]
+            }
+          ]
+        }
+      });
     }
   }
 };
 </script>
-
-<style scoped>
-.container {
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-.card {
-  margin-top: 20px;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-}
-
-.amount {
-  font-size: 28px;
-  font-weight: bold;
-  color: #42b983;
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
-
-</style>
