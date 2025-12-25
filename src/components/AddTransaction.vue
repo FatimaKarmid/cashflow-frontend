@@ -19,13 +19,13 @@
           v-model="newTransaction.category"
           required
       >
-        <option>Lebensmittel</option>
-        <option>Kleidung</option>
-        <option>Fahrtkosten</option>
-        <option>Miete</option>
-        <option>Freizeit</option>
-        <option>Gesundheit</option>
-        <option>Sonstiges</option>
+        <option value="LEBENSMITTEL">Lebensmittel</option>
+        <option value="KLEIDUNG">Kleidung</option>
+        <option value="FAHRTKOSTEN">Fahrtkosten</option>
+        <option value="MIETE">Miete</option>
+        <option value="FREIZEIT">Freizeit</option>
+        <option value="GESUNDHEIT">Gesundheit</option>
+        <option value="SONSTIGES">Sonstiges</option>
       </select>
 
       <label for="datum">Datum</label>
@@ -55,32 +55,24 @@
 <script>
 export default {
   name: "AusgabeHinzufuegen",
+
   data() {
     return {
       loading: false,
       error: null,
       newTransaction: {
         amount: null,
-        category: "Lebensmittel",
+        category: "LEBENSMITTEL",
         date: "",
         note: ""
       }
     };
   },
+
   methods: {
     submitTransaction() {
       this.error = null;
       this.loading = true;
-
-      const categoryMap = {
-        Lebensmittel: 1,
-        Kleidung: 2,
-        Fahrtkosten: 3,
-        Miete: 4,
-        Freizeit: 5,
-        Gesundheit: 6,
-        Sonstiges: 7
-      };
 
       fetch("https://cashflow-6.onrender.com/auszahlungen", {
         method: "POST",
@@ -90,23 +82,23 @@ export default {
         body: JSON.stringify({
           betrag: this.newTransaction.amount,
           datum: this.newTransaction.date,
-          zahlungsart: 1, // KARTE
-          verwendungszweck: categoryMap[this.newTransaction.category],
+          zahlungsart: "KARTE",
+          verwendungszweck: this.newTransaction.category,
           notiz: this.newTransaction.note
         })
       })
           .then(async response => {
-            const text = await response.text();
             if (!response.ok) {
-              throw new Error(text || "Fehler beim Speichern");
+              const msg = await response.text();
+              throw new Error(msg || "Fehler beim Speichern");
             }
-            return text;
+            return response.json();
           })
           .then(() => {
             alert("✅ Ausgabe erfolgreich gespeichert");
             this.newTransaction = {
               amount: null,
-              category: "Lebensmittel",
+              category: "LEBENSMITTEL",
               date: "",
               note: ""
             };
