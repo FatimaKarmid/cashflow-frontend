@@ -3,6 +3,7 @@
     <h2>Neue Ausgabe hinzufügen</h2>
 
     <form @submit.prevent="submitTransaction">
+      <!-- BETRAG -->
       <label for="betrag">Betrag (€)</label>
       <input
           type="number"
@@ -13,6 +14,7 @@
           required
       />
 
+      <!-- KATEGORIE -->
       <label for="verwendungszweck">Kategorie</label>
       <select
           id="verwendungszweck"
@@ -28,6 +30,21 @@
         <option value="SONSTIGES">Sonstiges</option>
       </select>
 
+      <!-- ZAHLUNGSART -->
+      <label for="zahlungsart">Zahlungsart</label>
+      <select
+          id="zahlungsart"
+          v-model="newTransaction.payment"
+          required
+      >
+        <option value="BAR">Bar</option>
+        <option value="KARTE">Karte</option>
+        <option value="UEBERWEISUNG">Überweisung</option>
+        <option value="LASTSCHRIFT">Lastschrift</option>
+        <option value="SONSTIGES">Sonstiges</option>
+      </select>
+
+      <!-- DATUM -->
       <label for="datum">Datum</label>
       <input
           type="date"
@@ -36,6 +53,7 @@
           required
       />
 
+      <!-- NOTIZ -->
       <label for="notiz">Notiz</label>
       <textarea
           id="notiz"
@@ -63,6 +81,7 @@ export default {
       newTransaction: {
         amount: null,
         category: "LEBENSMITTEL",
+        payment: "KARTE",
         date: "",
         note: ""
       }
@@ -82,7 +101,7 @@ export default {
         body: JSON.stringify({
           betrag: this.newTransaction.amount,
           datum: this.newTransaction.date,
-          zahlungsart: "KARTE",
+          zahlungsart: this.newTransaction.payment,
           verwendungszweck: this.newTransaction.category,
           notiz: this.newTransaction.note
         })
@@ -99,6 +118,7 @@ export default {
             this.newTransaction = {
               amount: null,
               category: "LEBENSMITTEL",
+              payment: "KARTE",
               date: "",
               note: ""
             };

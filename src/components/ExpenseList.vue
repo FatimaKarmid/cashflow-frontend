@@ -4,8 +4,8 @@
 
     <!-- FILTER -->
     <div class="filter">
-      <label for="kategorie">Kategorie:</label>
-      <select id="kategorie" v-model="selectedKategorie" @change="applyFilter">
+      <label>Kategorie:</label>
+      <select v-model="selectedKategorie" @change="applyFilter">
         <option value="">Alle</option>
         <option value="LEBENSMITTEL">Lebensmittel</option>
         <option value="KLEIDUNG">Kleidung</option>
@@ -16,21 +16,33 @@
         <option value="SONSTIGES">Sonstiges</option>
       </select>
 
-      <label for="datum">Datum:</label>
-      <input id="datum" type="date" v-model="selectedDate" @change="applyFilter" />
+      <label>Datum:</label>
+      <input type="date" v-model="selectedDate" @change="applyFilter" />
     </div>
 
     <!-- LISTE -->
     <ul v-if="expenses.length">
-      <li v-for="expense in expenses" :key="expense.id" class="expense-item">
+      <li
+          v-for="expense in expenses"
+          :key="expense.id"
+          class="expense-item"
+      >
         <div>
           <strong>💰 {{ expense.betrag }} €</strong><br>
-          Kategorie: {{ verwendungszweckText(expense.verwendungszweck) }}<br>
+
+          Kategorie: {{ beautify(expense.verwendungszweck) }}<br>
+          Zahlungsart: {{ beautify(expense.zahlungsart) }}<br>
           Datum: {{ expense.datum }}<br>
-          <span v-if="expense.notiz">Notiz: {{ expense.notiz }}</span>
+
+          <span v-if="expense.notiz">
+            Notiz: {{ expense.notiz }}
+          </span>
         </div>
 
-        <button class="delete-btn" @click="deleteTransaction(expense.id)">
+        <button
+            class="delete-btn"
+            @click="deleteTransaction(expense.id)"
+        >
           Löschen
         </button>
       </li>
@@ -41,19 +53,9 @@
 </template>
 
 <script>
-// Mapping: Integer aus Backend → lesbarer Text
-const verwendungszweckMap = {
-  1: "Lebensmittel",
-  2: "Kleidung",
-  3: "Fahrtkosten",
-  4: "Miete",
-  5: "Freizeit",
-  6: "Gesundheit",
-  7: "Sonstiges"
-};
-
 export default {
   name: "AusgabenListe",
+
   data() {
     return {
       expenses: [],
@@ -61,13 +63,19 @@ export default {
       selectedDate: ""
     };
   },
+
   mounted() {
     this.fetchExpenses();
   },
+
   methods: {
-    // Zahl → Text
-    verwendungszweckText(value) {
-      return verwendungszweckMap[value] || "Unbekannt";
+    // STRING → schöner Text
+    beautify(value) {
+      if (!value) return "—";
+      return value
+          .toLowerCase()
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, c => c.toUpperCase());
     },
 
     // Alle laden
@@ -78,19 +86,18 @@ export default {
             this.expenses = data;
           })
           .catch(err =>
-              console.error("Fehler beim Laden der Ausgaben:", err)
+              console.error("Fehler beim Laden:", err)
           );
     },
 
     // Kombinierter Filter
     applyFilter() {
-      // Priorität: Datum > Kategorie
       let url = "https://cashflow-6.onrender.com/auszahlungen";
 
       if (this.selectedDate) {
-        url = `${url}?datum=${this.selectedDate}`;
+        url += `?datum=${this.selectedDate}`;
       } else if (this.selectedKategorie) {
-        url = `${url}/filter?kategorie=${this.selectedKategorie}`;
+        url += `/filter?kategorie=${this.selectedKategorie}`;
       }
 
       fetch(url)
@@ -108,9 +115,9 @@ export default {
       fetch(`https://cashflow-6.onrender.com/auszahlungen/${id}`, {
         method: "DELETE"
       })
-          .then(response => {
-            if (response.ok) {
-              this.applyFilter(); // Filter beibehalten
+          .then(res => {
+            if (res.ok) {
+              this.applyFilter();
             } else {
               alert("Fehler beim Löschen");
             }
@@ -125,13 +132,12 @@ export default {
 
 <style scoped>
 .container {
-  max-width: 700px;
+  max-width: 720px;
   margin: 0 auto;
 }
 
 .filter {
   display: flex;
-  align-items: center;
   gap: 12px;
   margin-bottom: 20px;
 }
@@ -150,7 +156,6 @@ ul {
 .expense-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   background: white;
   margin-bottom: 12px;
   padding: 14px;
