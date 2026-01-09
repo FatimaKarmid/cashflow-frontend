@@ -78,7 +78,7 @@ export default {
           .replace(/\b\w/g, c => c.toUpperCase());
     },
 
-    // Alle laden
+    // Alle Ausgaben laden
     fetchExpenses() {
       fetch("https://cashflow-6.onrender.com/auszahlungen")
           .then(res => res.json())
@@ -90,14 +90,21 @@ export default {
           );
     },
 
-    // Kombinierter Filter
+    // Kombinierter Filter (Kategorie + Datum)
     applyFilter() {
       let url = "https://cashflow-6.onrender.com/auszahlungen";
 
-      if (this.selectedDate) {
+      // Wenn beide Filter gesetzt sind (Kategorie und Datum)
+      if (this.selectedKategorie && this.selectedDate) {
+        url += `?kategorie=${this.selectedKategorie}&datum=${this.selectedDate}`;
+      }
+      // Wenn nur das Datum gesetzt ist
+      else if (this.selectedDate) {
         url += `?datum=${this.selectedDate}`;
-      } else if (this.selectedKategorie) {
-        url += `/filter?kategorie=${this.selectedKategorie}`;
+      }
+      // Wenn nur die Kategorie gesetzt ist
+      else if (this.selectedKategorie) {
+        url += `?kategorie=${this.selectedKategorie}`;
       }
 
       fetch(url)
@@ -117,7 +124,7 @@ export default {
       })
           .then(res => {
             if (res.ok) {
-              this.applyFilter();
+              this.applyFilter(); // Filter nach Löschen beibehalten
             } else {
               alert("Fehler beim Löschen");
             }
