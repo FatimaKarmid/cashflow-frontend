@@ -22,27 +22,16 @@
 
     <!-- LISTE -->
     <ul v-if="expenses.length">
-      <li
-          v-for="expense in expenses"
-          :key="expense.id"
-          class="expense-item"
-      >
+      <li v-for="expense in expenses" :key="expense.id" class="expense-item">
         <div>
           <strong>💰 {{ expense.betrag }} €</strong><br>
-
           Kategorie: {{ beautify(expense.verwendungszweck) }}<br>
           Zahlungsart: {{ beautify(expense.zahlungsart) }}<br>
           Datum: {{ expense.datum }}<br>
-
-          <span v-if="expense.notiz">
-            Notiz: {{ expense.notiz }}
-          </span>
+          <span v-if="expense.notiz">Notiz: {{ expense.notiz }}</span>
         </div>
 
-        <button
-            class="delete-btn"
-            @click="deleteTransaction(expense.id)"
-        >
+        <button class="delete-btn" @click="deleteTransaction(expense.id)">
           Löschen
         </button>
       </li>
@@ -69,7 +58,7 @@ export default {
   },
 
   methods: {
-    // Schönere Darstellung von Enum-Werten
+    // STRING → schöner Text für die Darstellung von Enum-Werten
     beautify(value) {
       if (!value) return "—";
       return value
