@@ -79,19 +79,19 @@ export default {
 
     // Kombinierter Filter (Kategorie + Datum)
     applyFilter() {
-      let url = "https://cashflow-6.onrender.com/auszahlungen";
+      let url = "https://cashflow-6.onrender.com/auszahlungen/filter?";
 
       // Wenn beide Filter gesetzt sind (Kategorie und Datum)
       if (this.selectedKategorie && this.selectedDate) {
-        url += `?kategorie=${this.selectedKategorie}&datum=${this.selectedDate}`;
+        url += `kategorie=${this.selectedKategorie}&datum=${this.selectedDate}`;
       }
       // Wenn nur das Datum gesetzt ist
       else if (this.selectedDate) {
-        url += `?datum=${this.selectedDate}`;
+        url += `datum=${this.selectedDate}`;
       }
       // Wenn nur die Kategorie gesetzt ist
       else if (this.selectedKategorie) {
-        url += `?kategorie=${this.selectedKategorie}`;
+        url += `kategorie=${this.selectedKategorie}`;
       }
 
       // API-Aufruf mit den dynamischen Filterparametern
