@@ -18,20 +18,33 @@
 
       <label>Datum:</label>
       <input type="date" v-model="selectedDate" @change="applyFilter" />
+
+      <button class="reset-btn" @click="resetFilter">
+        Zurücksetzen
+      </button>
     </div>
 
     <!-- LISTE -->
     <ul v-if="expenses.length">
-      <li v-for="expense in expenses" :key="expense.id" class="expense-item">
+      <li
+          v-for="expense in expenses"
+          :key="expense.id"
+          class="expense-item"
+      >
         <div>
           <strong>💰 {{ expense.betrag }} €</strong><br>
           Kategorie: {{ beautify(expense.verwendungszweck) }}<br>
           Zahlungsart: {{ beautify(expense.zahlungsart) }}<br>
           Datum: {{ expense.datum }}<br>
-          <span v-if="expense.notiz">Notiz: {{ expense.notiz }}</span>
+          <span v-if="expense.notiz">
+            Notiz: {{ expense.notiz }}
+          </span>
         </div>
 
-        <button class="delete-btn" @click="deleteTransaction(expense.id)">
+        <button
+            class="delete-btn"
+            @click="deleteTransaction(expense.id)"
+        >
           Löschen
         </button>
       </li>
@@ -47,24 +60,24 @@ export default {
 
   data() {
     return {
-      expenses: [],          // Die Liste der Ausgaben
-      selectedKategorie: "", // Die aktuell ausgewählte Kategorie
-      selectedDate: ""       // Das aktuell ausgewählte Datum
+      expenses: [],
+      selectedKategorie: "",
+      selectedDate: ""
     };
   },
 
   mounted() {
-    this.fetchExpenses();  // Initiale Ausgaben laden
+    this.fetchExpenses();
   },
 
   methods: {
-    // STRING → schöner Text für die Darstellung von Enum-Werten
+    // Enum
     beautify(value) {
       if (!value) return "—";
       return value
           .toLowerCase()
-          .replace(/_/g, " ")    // Unterstriche durch Leerzeichen ersetzen
-          .replace(/\b\w/g, c => c.toUpperCase()); // Erstes Zeichen jedes Wortes großschreiben
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, c => c.toUpperCase());
     },
 
     // Alle Ausgaben laden
@@ -72,50 +85,65 @@ export default {
       fetch("https://cashflow-6.onrender.com/auszahlungen")
           .then(res => res.json())
           .then(data => {
-            this.expenses = data; // Setzt die erhaltenen Daten in die expenses-Variable
+            this.expenses = data;
           })
-          .catch(err => console.error("Fehler beim Laden:", err)); // Fehlerbehandlung
+          .catch(err =>
+              console.error("Fehler beim Laden:", err)
+          );
     },
 
-    // Kombinierter Filter (Kategorie + Datum)
+    // KOMBINIERTER FILTER
     applyFilter() {
-      let url = "https://cashflow-6.onrender.com/auszahlungen/filter?";
-
-      // Wenn beide Filter gesetzt sind (Kategorie und Datum)
-      if (this.selectedKategorie && this.selectedDate) {
-        url += `kategorie=${this.selectedKategorie}&datum=${this.selectedDate}`;
-      }
-      // Wenn nur das Datum gesetzt ist
-      else if (this.selectedDate) {
-        url += `datum=${this.selectedDate}`;
-      }
-      // Wenn nur die Kategorie gesetzt ist
-      else if (this.selectedKategorie) {
-        url += `kategorie=${this.selectedKategorie}`;
+      // Wenn kein Filter gesetzt → alles laden
+      if (!this.selectedKategorie && !this.selectedDate) {
+        this.fetchExpenses();
+        return;
       }
 
-      // API-Aufruf mit den dynamischen Filterparametern
+      const params = new URLSearchParams();
+
+      if (this.selectedKategorie) {
+        params.append("kategorie", this.selectedKategorie);
+      }
+
+      if (this.selectedDate) {
+        params.append("datum", this.selectedDate);
+      }
+
+      const url = `https://cashflow-6.onrender.com/auszahlungen/filter?${params.toString()}`;
+
       fetch(url)
           .then(res => res.json())
           .then(data => {
-            this.expenses = data; // Setzt die gefilterten Daten in die expenses-Variable
+            this.expenses = data;
           })
-          .catch(err => console.error("Fehler beim Filtern:", err)); // Fehlerbehandlung
+          .catch(err =>
+              console.error("Fehler beim Filtern:", err)
+          );
     },
 
-    // Löschen einer Ausgabe
+    // Filter zurücksetzen
+    resetFilter() {
+      this.selectedKategorie = "";
+      this.selectedDate = "";
+      this.fetchExpenses();
+    },
+
+    // Löschen
     deleteTransaction(id) {
       fetch(`https://cashflow-6.onrender.com/auszahlungen/${id}`, {
         method: "DELETE"
       })
           .then(res => {
             if (res.ok) {
-              this.applyFilter(); // Filter nach Löschen beibehalten
+              this.applyFilter();
             } else {
               alert("Fehler beim Löschen");
             }
           })
-          .catch(err => console.error("Fehler beim Löschen:", err)); // Fehlerbehandlung
+          .catch(err =>
+              console.error("Fehler beim Löschen:", err)
+          );
     }
   }
 };
@@ -131,12 +159,21 @@ export default {
   display: flex;
   gap: 12px;
   margin-bottom: 20px;
+  align-items: center;
 }
 
 select,
 input {
   padding: 6px;
   font-size: 0.95rem;
+}
+
+.reset-btn {
+  padding: 6px 10px;
+  background: #bdc3c7;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 ul {
