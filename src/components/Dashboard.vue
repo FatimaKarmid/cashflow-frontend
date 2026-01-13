@@ -7,7 +7,12 @@
       <!-- SUMME PRO TAG -->
       <div class="card">
         <h3>Ausgaben pro Tag</h3>
-        <input type="date" v-model="selectedDate" @change="loadTagSumme" />
+        <input
+            type="date"
+            class="date-input"
+            v-model="selectedDate"
+            @change="loadTagSumme"
+        />
         <p class="amount">{{ tagSumme }} €</p>
       </div>
 
@@ -16,8 +21,20 @@
         <h3>Ausgaben pro Monat</h3>
 
         <div class="row">
-          <input type="number" min="1" max="12" v-model.number="monat" />
-          <input type="number" v-model.number="jahr" />
+          <input
+              type="number"
+              min="1"
+              max="12"
+              v-model.number="monat"
+              class="month-input"
+              placeholder="MM"
+          />
+          <input
+              type="number"
+              v-model.number="jahr"
+              class="year-input"
+              placeholder="YYYY"
+          />
         </div>
 
         <button @click="loadMonatDaten">
@@ -63,12 +80,10 @@ export default {
   },
 
   mounted() {
-    // Optional: direkt Monatsdaten laden
     this.loadMonatDaten();
   },
 
   methods: {
-    // ========= HILFSFUNKTION =========
     beautify(text) {
       return text
           .toLowerCase()
@@ -76,7 +91,6 @@ export default {
           .replace(/\b\w/g, c => c.toUpperCase());
     },
 
-    // ========= TAG =========
     loadTagSumme() {
       if (!this.selectedDate) return;
 
@@ -92,11 +106,9 @@ export default {
           });
     },
 
-    // ========= MONAT + CHART =========
     loadMonatDaten() {
       this.chartDataLoaded = false;
 
-      // Summe pro Monat
       fetch(
           `https://cashflow-6.onrender.com/auszahlungen/summe-monat?monat=${this.monat}&jahr=${this.jahr}`
       )
@@ -105,7 +117,6 @@ export default {
             this.monatSumme = data;
           });
 
-      // Chart-Daten
       fetch(
           `https://cashflow-6.onrender.com/auszahlungen/chart?monat=${this.monat}&jahr=${this.jahr}`
       )
@@ -119,7 +130,6 @@ export default {
           });
     },
 
-    // ========= CHART =========
     loadChart(data) {
       const ctx = this.$refs.chart;
 
@@ -192,7 +202,20 @@ export default {
   margin-bottom: 10px;
 }
 
-input {
+/* 🎯 GEZIELTE INPUT-GRÖSSEN */
+.month-input {
+  width: 70px;
+  padding: 8px;
+  font-size: 1rem;
+}
+
+.year-input {
+  width: 90px;
+  padding: 8px;
+  font-size: 1rem;
+}
+
+.date-input {
   padding: 8px;
   font-size: 1rem;
 }
