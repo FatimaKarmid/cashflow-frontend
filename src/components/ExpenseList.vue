@@ -1,149 +1,180 @@
 <template>
   <div class="container">
-    <h2>Ausgabenübersicht</h2>
+    <h2>Dashboard</h2>
 
-    <!-- FILTER -->
-    <div class="filter">
-      <label>Kategorie:</label>
-      <select v-model="selectedKategorie" @change="applyFilter">
-        <option value="">Alle</option>
-        <option value="LEBENSMITTEL">Lebensmittel</option>
-        <option value="KLEIDUNG">Kleidung</option>
-        <option value="FAHRTKOSTEN">Fahrtkosten</option>
-        <option value="MIETE">Miete</option>
-        <option value="FREIZEIT">Freizeit</option>
-        <option value="GESUNDHEIT">Gesundheit</option>
-        <option value="SONSTIGES">Sonstiges</option>
-      </select>
+    <div class="dashboard-grid">
 
-      <label>Datum:</label>
-      <input type="date" v-model="selectedDate" @change="applyFilter" />
+      <!-- SUMME PRO TAG -->
+      <div class="card">
+        <h3>Ausgaben pro Tag</h3>
 
-      <button class="reset-btn" @click="resetFilter">
-        Zurücksetzen
-      </button>
-    </div>
+        <input
+            type="date"
+            class="date-input"
+            v-model="selectedDate"
+            @change="loadTagSumme"
+        />
 
-    <!-- LISTE -->
-    <ul v-if="expenses.length">
-      <li
-          v-for="expense in expenses"
-          :key="expense.id"
-          class="expense-item"
-      >
-        <div>
-          <strong>💰 {{ expense.betrag }} €</strong><br>
-          Kategorie: {{ beautify(expense.verwendungszweck) }}<br>
-          Zahlungsart: {{ beautify(expense.zahlungsart) }}<br>
-          Datum: {{ expense.datum }}<br>
-          <span v-if="expense.notiz">
-            Notiz: {{ expense.notiz }}
-          </span>
+        <p class="amount">{{ tagSumme }} €</p>
+      </div>
+
+      <!-- SUMME PRO MONAT -->
+      <div class="card">
+        <h3>Ausgaben pro Monat</h3>
+
+        <div class="row">
+          <input
+              type="number"
+              min="1"
+              max="12"
+              v-model.number="monat"
+              class="month-input"
+              placeholder="MM"
+          />
+
+          <input
+              type="number"
+              min="2000"
+              max="2100"
+              v-model.number="jahr"
+              class="year-input"
+              placeholder="YYYY"
+          />
         </div>
 
-        <button
-            class="delete-btn"
-            @click="deleteTransaction(expense.id)"
-        >
-          Löschen
+        <button @click="loadMonatDaten">
+          Berechnen
         </button>
-      </li>
-    </ul>
 
-    <p v-else>Keine Ausgaben vorhanden.</p>
+        <p class="amount">{{ monatSumme }} €</p>
+      </div>
+
+      <!-- CHART -->
+      <div class="card">
+        <h3>Ausgaben nach Kategorie</h3>
+
+        <p v-if="!chartDataLoaded" class="hint">
+          Monat auswählen und berechnen
+        </p>
+
+        <canvas v-show="chartDataLoaded" ref="chart"></canvas>
+      </div>
+
+    </div>
   </div>
 </template>
 
 <script>
+import { Chart } from "chart.js/auto";
+
 export default {
-  name: "AusgabenListe",
+  name: "Dashboard",
 
   data() {
     return {
-      expenses: [],
-      selectedKategorie: "",
-      selectedDate: ""
+      selectedDate: "",
+      tagSumme: 0,
+
+      monat: new Date().getMonth() + 1,
+      jahr: new Date().getFullYear(),
+      monatSumme: 0,
+
+      chart: null,
+      chartDataLoaded: false
     };
   },
 
   mounted() {
-    this.fetchExpenses();
+    this.loadMonatDaten();
   },
 
   methods: {
-    // Enum
-    beautify(value) {
-      if (!value) return "—";
-      return value
+    beautify(text) {
+      return text
           .toLowerCase()
           .replace(/_/g, " ")
           .replace(/\b\w/g, c => c.toUpperCase());
     },
 
-    // Alle Ausgaben laden
-    fetchExpenses() {
-      fetch("https://cashflow-6.onrender.com/auszahlungen")
-          .then(res => res.json())
-          .then(data => {
-            this.expenses = data;
-          })
-          .catch(err =>
-              console.error("Fehler beim Laden:", err)
-          );
-    },
-
-    // KOMBINIERTER FILTER
-    applyFilter() {
-      // Wenn kein Filter gesetzt → alles laden
-      if (!this.selectedKategorie && !this.selectedDate) {
-        this.fetchExpenses();
+    loadTagSumme() {
+      if (!this.selectedDate) {
+        this.tagSumme = 0;
         return;
       }
 
-      const params = new URLSearchParams();
-
-      if (this.selectedKategorie) {
-        params.append("kategorie", this.selectedKategorie);
-      }
-
-      if (this.selectedDate) {
-        params.append("datum", this.selectedDate);
-      }
-
-      const url = `https://cashflow-6.onrender.com/auszahlungen/filter?${params.toString()}`;
-
-      fetch(url)
+      fetch(
+          `https://cashflow-6.onrender.com/auszahlungen/summe?datum=${this.selectedDate}`
+      )
           .then(res => res.json())
           .then(data => {
-            this.expenses = data;
+            this.tagSumme = data;
           })
-          .catch(err =>
-              console.error("Fehler beim Filtern:", err)
-          );
+          .catch(() => {
+            this.tagSumme = 0;
+          });
     },
 
-    // Filter zurücksetzen
-    resetFilter() {
-      this.selectedKategorie = "";
-      this.selectedDate = "";
-      this.fetchExpenses();
+    loadMonatDaten() {
+      if (!this.monat || !this.jahr) return;
+
+      this.chartDataLoaded = false;
+
+      fetch(
+          `https://cashflow-6.onrender.com/auszahlungen/summe-monat?monat=${this.monat}&jahr=${this.jahr}`
+      )
+          .then(res => res.json())
+          .then(data => {
+            this.monatSumme = data;
+          });
+
+      fetch(
+          `https://cashflow-6.onrender.com/auszahlungen/chart?monat=${this.monat}&jahr=${this.jahr}`
+      )
+          .then(res => res.json())
+          .then(data => {
+            this.loadChart(data);
+            this.chartDataLoaded = true;
+          })
+          .catch(() => {
+            this.chartDataLoaded = false;
+          });
     },
 
-    // Löschen
-    deleteTransaction(id) {
-      fetch(`https://cashflow-6.onrender.com/auszahlungen/${id}`, {
-        method: "DELETE"
-      })
-          .then(res => {
-            if (res.ok) {
-              this.applyFilter();
-            } else {
-              alert("Fehler beim Löschen");
+    loadChart(data) {
+      const ctx = this.$refs.chart;
+
+      if (this.chart) {
+        this.chart.destroy();
+      }
+
+      this.chart = new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: Object.keys(data).map(this.beautify),
+          datasets: [
+            {
+              data: Object.values(data),
+              backgroundColor: [
+                "#42b983",
+                "#3498db",
+                "#f39c12",
+                "#9b59b6",
+                "#e74c3c",
+                "#1abc9c",
+                "#95a5a6"
+              ]
             }
-          })
-          .catch(err =>
-              console.error("Fehler beim Löschen:", err)
-          );
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom"
+            }
+          }
+        }
+      });
     }
   }
 };
@@ -151,56 +182,67 @@ export default {
 
 <style scoped>
 .container {
-  max-width: 720px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
-.filter {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-  align-items: center;
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
 }
 
-select,
-input {
-  padding: 6px;
-  font-size: 0.95rem;
-}
-
-.reset-btn {
-  padding: 6px 10px;
-  background: #bdc3c7;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-.expense-item {
-  display: flex;
-  justify-content: space-between;
+.card {
   background: white;
-  margin-bottom: 12px;
-  padding: 14px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
-.delete-btn {
-  background-color: #e74c3c;
+.amount {
+  font-size: 28px;
+  font-weight: bold;
+  color: #42b983;
+  margin-top: 10px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* 🎯 KLEINE, SAUBERE INPUTS */
+.month-input {
+  width: 60px;
+  padding: 8px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.year-input {
+  width: 80px;
+  padding: 8px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.date-input {
+  padding: 8px;
+  font-size: 1rem;
+}
+
+button {
+  padding: 8px 12px;
+  background-color: #42b983;
   color: white;
   border: none;
-  padding: 8px 12px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-.delete-btn:hover {
-  background-color: #c0392b;
+.hint {
+  color: #888;
+  font-size: 0.9rem;
 }
 </style>

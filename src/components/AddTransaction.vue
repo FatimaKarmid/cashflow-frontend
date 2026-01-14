@@ -3,6 +3,17 @@
     <h2>Neue Ausgabe hinzufügen</h2>
 
     <form @submit.prevent="submitTransaction">
+
+      <!-- NAME -->
+      <label for="name">Name der Ausgabe</label>
+      <input
+          type="text"
+          id="name"
+          v-model="newTransaction.name"
+          placeholder="z.B. Netflix, Edeka, Miete"
+          required
+      />
+
       <!-- BETRAG -->
       <label for="betrag">Betrag (€)</label>
       <input
@@ -79,6 +90,7 @@ export default {
       loading: false,
       error: null,
       newTransaction: {
+        name: "",
         amount: null,
         category: "LEBENSMITTEL",
         payment: "KARTE",
@@ -99,6 +111,7 @@ export default {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
+          name: this.newTransaction.name,
           betrag: this.newTransaction.amount,
           datum: this.newTransaction.date,
           zahlungsart: this.newTransaction.payment,
@@ -116,6 +129,7 @@ export default {
           .then(() => {
             alert("✅ Ausgabe erfolgreich gespeichert");
             this.newTransaction = {
+              name: "",
               amount: null,
               category: "LEBENSMITTEL",
               payment: "KARTE",
@@ -124,7 +138,6 @@ export default {
             };
           })
           .catch(err => {
-            console.error(err);
             this.error = err.message;
           })
           .finally(() => {

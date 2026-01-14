@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="329619cc-1bd5-4bc4-ba74-c1f4dc1e8005" name="Changes" comment=" Filterung verbesserung" />
+    <list default="true" id="329619cc-1bd5-4bc4-ba74-c1f4dc1e8005" name="Changes" comment=" Filterung breite ändern">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/AddTransaction.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/AddTransaction.vue" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -113,7 +116,8 @@
       <workItem from="1767093122136" duration="310000" />
       <workItem from="1767390413460" duration="5001000" />
       <workItem from="1767900042338" duration="8200000" />
-      <workItem from="1768302627108" duration="1564000" />
+      <workItem from="1768302627108" duration="4598000" />
+      <workItem from="1768392537965" duration="1454000" />
     </task>
     <task id="LOCAL-00001" summary="App vue">
       <option name="closed" value="true" />
@@ -267,7 +271,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768303925894</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary=" Filterung breite ändern">
+      <option name="closed" value="true" />
+      <created>1768304455567</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1768304455567</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -279,6 +291,7 @@
     <MESSAGE value=" Erweiterungen" />
     <MESSAGE value="zahlungsart Erweiterungen" />
     <MESSAGE value=" Filterung verbesserung" />
-    <option name="LAST_COMMIT_MESSAGE" value=" Filterung verbesserung" />
+    <MESSAGE value=" Filterung breite ändern" />
+    <option name="LAST_COMMIT_MESSAGE" value=" Filterung breite ändern" />
   </component>
 </project>

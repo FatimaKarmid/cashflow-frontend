@@ -7,12 +7,14 @@
       <!-- SUMME PRO TAG -->
       <div class="card">
         <h3>Ausgaben pro Tag</h3>
+
         <input
             type="date"
             class="date-input"
             v-model="selectedDate"
             @change="loadTagSumme"
         />
+
         <p class="amount">{{ tagSumme }} €</p>
       </div>
 
@@ -29,8 +31,11 @@
               class="month-input"
               placeholder="MM"
           />
+
           <input
               type="number"
+              min="2000"
+              max="2100"
               v-model.number="jahr"
               class="year-input"
               placeholder="YYYY"
@@ -92,7 +97,10 @@ export default {
     },
 
     loadTagSumme() {
-      if (!this.selectedDate) return;
+      if (!this.selectedDate) {
+        this.tagSumme = 0;
+        return;
+      }
 
       fetch(
           `https://cashflow-6.onrender.com/auszahlungen/summe?datum=${this.selectedDate}`
@@ -107,6 +115,8 @@ export default {
     },
 
     loadMonatDaten() {
+      if (!this.monat || !this.jahr) return;
+
       this.chartDataLoaded = false;
 
       fetch(
@@ -202,17 +212,19 @@ export default {
   margin-bottom: 10px;
 }
 
-/* 🎯 GEZIELTE INPUT-GRÖSSEN */
+/* 🎯 KLEINE, SAUBERE INPUTS */
 .month-input {
-  width: 70px;
+  width: 60px;
   padding: 8px;
   font-size: 1rem;
+  text-align: center;
 }
 
 .year-input {
-  width: 90px;
+  width: 80px;
   padding: 8px;
   font-size: 1rem;
+  text-align: center;
 }
 
 .date-input {
