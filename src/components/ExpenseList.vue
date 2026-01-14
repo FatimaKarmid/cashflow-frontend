@@ -1,179 +1,150 @@
 <template>
   <div class="container">
-    <h2>Dashboard</h2>
+    <h2>Ausgabenübersicht</h2>
 
-    <div class="dashboard-grid">
+    <!-- FILTER -->
+    <div class="filter">
+      <label>Name:</label>
+      <input
+          type="text"
+          v-model="searchName"
+          placeholder="Suchen..."
+          @input="applyFilter"
+      />
 
-      <!-- SUMME PRO TAG -->
-      <div class="card">
-        <h3>Ausgaben pro Tag</h3>
+      <label>Kategorie:</label>
+      <select v-model="selectedKategorie" @change="applyFilter">
+        <option value="">Alle</option>
+        <option value="LEBENSMITTEL">Lebensmittel</option>
+        <option value="KLEIDUNG">Kleidung</option>
+        <option value="FAHRTKOSTEN">Fahrtkosten</option>
+        <option value="MIETE">Miete</option>
+        <option value="FREIZEIT">Freizeit</option>
+        <option value="GESUNDHEIT">Gesundheit</option>
+        <option value="SONSTIGES">Sonstiges</option>
+      </select>
 
-        <input
-            type="date"
-            class="date-input"
-            v-model="selectedDate"
-            @change="loadTagSumme"
-        />
+      <label>Datum:</label>
+      <input type="date" v-model="selectedDate" @change="applyFilter" />
 
-        <p class="amount">{{ tagSumme }} €</p>
-      </div>
+      <button class="reset-btn" @click="resetFilter">
+        Zurücksetzen
+      </button>
+    </div>
 
-      <!-- SUMME PRO MONAT -->
-      <div class="card">
-        <h3>Ausgaben pro Monat</h3>
+    <!-- LISTE -->
+    <ul v-if="expenses.length">
+      <li v-for="expense in expenses" :key="expense.id" class="expense-item">
 
-        <div class="row">
-          <input
-              type="number"
-              min="1"
-              max="12"
-              v-model.number="monat"
-              class="month-input"
-              placeholder="MM"
-          />
-
-          <input
-              type="number"
-              min="2000"
-              max="2100"
-              v-model.number="jahr"
-              class="year-input"
-              placeholder="YYYY"
-          />
+        <!-- VIEW -->
+        <div v-if="editId !== expense.id">
+          <strong>💰 {{ expense.betrag }} €</strong><br>
+          Name: {{ expense.name }}<br>
+          Kategorie: {{ beautify(expense.verwendungszweck) }}<br>
+          Zahlungsart: {{ beautify(expense.zahlungsart) }}<br>
+          Datum: {{ expense.datum }}<br>
+          <span v-if="expense.notiz">Notiz: {{ expense.notiz }}</span>
         </div>
 
-        <button @click="loadMonatDaten">
-          Berechnen
-        </button>
+        <!-- EDIT -->
+        <div v-else>
+          <input v-model="editExpense.name" />
+          <input type="number" v-model.number="editExpense.betrag" />
+          <input type="date" v-model="editExpense.datum" />
+        </div>
 
-        <p class="amount">{{ monatSumme }} €</p>
-      </div>
+        <!-- ACTIONS -->
+        <div class="actions">
+          <button v-if="editId !== expense.id" @click="startEdit(expense)">
+            Bearbeiten
+          </button>
 
-      <!-- CHART -->
-      <div class="card">
-        <h3>Ausgaben nach Kategorie</h3>
+          <button v-else @click="saveEdit">
+            Speichern
+          </button>
 
-        <p v-if="!chartDataLoaded" class="hint">
-          Monat auswählen und berechnen
-        </p>
+          <button class="delete-btn" @click="deleteTransaction(expense.id)">
+            Löschen
+          </button>
+        </div>
+      </li>
+    </ul>
 
-        <canvas v-show="chartDataLoaded" ref="chart"></canvas>
-      </div>
-
-    </div>
+    <p v-else>Keine Ausgaben vorhanden.</p>
   </div>
 </template>
 
 <script>
-import { Chart } from "chart.js/auto";
-
 export default {
-  name: "Dashboard",
+  name: "AusgabenListe",
 
   data() {
     return {
+      expenses: [],
+      selectedKategorie: "",
       selectedDate: "",
-      tagSumme: 0,
+      searchName: "",
 
-      monat: new Date().getMonth() + 1,
-      jahr: new Date().getFullYear(),
-      monatSumme: 0,
-
-      chart: null,
-      chartDataLoaded: false
+      editId: null,
+      editExpense: {}
     };
   },
 
   mounted() {
-    this.loadMonatDaten();
+    this.fetchExpenses();
   },
 
   methods: {
-    beautify(text) {
-      return text
-          .toLowerCase()
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, c => c.toUpperCase());
+    beautify(value) {
+      return value
+          ? value.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+          : "—";
     },
 
-    loadTagSumme() {
-      if (!this.selectedDate) {
-        this.tagSumme = 0;
-        return;
-      }
-
-      fetch(
-          `https://cashflow-6.onrender.com/auszahlungen/summe?datum=${this.selectedDate}`
-      )
+    fetchExpenses() {
+      fetch("https://cashflow-6.onrender.com/auszahlungen")
           .then(res => res.json())
-          .then(data => {
-            this.tagSumme = data;
-          })
-          .catch(() => {
-            this.tagSumme = 0;
-          });
+          .then(data => (this.expenses = data));
     },
 
-    loadMonatDaten() {
-      if (!this.monat || !this.jahr) return;
+    applyFilter() {
+      const params = new URLSearchParams();
 
-      this.chartDataLoaded = false;
+      if (this.selectedKategorie) params.append("kategorie", this.selectedKategorie);
+      if (this.selectedDate) params.append("datum", this.selectedDate);
+      if (this.searchName) params.append("name", this.searchName);
 
-      fetch(
-          `https://cashflow-6.onrender.com/auszahlungen/summe-monat?monat=${this.monat}&jahr=${this.jahr}`
-      )
+      fetch(`https://cashflow-6.onrender.com/auszahlungen/filter?${params}`)
           .then(res => res.json())
-          .then(data => {
-            this.monatSumme = data;
-          });
-
-      fetch(
-          `https://cashflow-6.onrender.com/auszahlungen/chart?monat=${this.monat}&jahr=${this.jahr}`
-      )
-          .then(res => res.json())
-          .then(data => {
-            this.loadChart(data);
-            this.chartDataLoaded = true;
-          })
-          .catch(() => {
-            this.chartDataLoaded = false;
-          });
+          .then(data => (this.expenses = data));
     },
 
-    loadChart(data) {
-      const ctx = this.$refs.chart;
+    resetFilter() {
+      this.selectedKategorie = "";
+      this.selectedDate = "";
+      this.searchName = "";
+      this.fetchExpenses();
+    },
 
-      if (this.chart) {
-        this.chart.destroy();
-      }
+    deleteTransaction(id) {
+      fetch(`https://cashflow-6.onrender.com/auszahlungen/${id}`, {
+        method: "DELETE"
+      }).then(() => this.applyFilter());
+    },
 
-      this.chart = new Chart(ctx, {
-        type: "pie",
-        data: {
-          labels: Object.keys(data).map(this.beautify),
-          datasets: [
-            {
-              data: Object.values(data),
-              backgroundColor: [
-                "#42b983",
-                "#3498db",
-                "#f39c12",
-                "#9b59b6",
-                "#e74c3c",
-                "#1abc9c",
-                "#95a5a6"
-              ]
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: "bottom"
-            }
-          }
-        }
+    startEdit(expense) {
+      this.editId = expense.id;
+      this.editExpense = { ...expense };
+    },
+
+    saveEdit() {
+      fetch(`https://cashflow-6.onrender.com/auszahlungen/${this.editId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(this.editExpense)
+      }).then(() => {
+        this.editId = null;
+        this.fetchExpenses();
       });
     }
   }
@@ -182,67 +153,36 @@ export default {
 
 <style scoped>
 .container {
-  max-width: 900px;
+  max-width: 760px;
   margin: 0 auto;
 }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 25px;
-}
-
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
-
-.amount {
-  font-size: 28px;
-  font-weight: bold;
-  color: #42b983;
-  margin-top: 10px;
-}
-
-.row {
+.filter {
   display: flex;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
-/* 🎯 KLEINE, SAUBERE INPUTS */
-.month-input {
-  width: 60px;
-  padding: 8px;
-  font-size: 1rem;
-  text-align: center;
+.expense-item {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  margin-bottom: 12px;
+  padding: 14px;
+  border-radius: 8px;
 }
 
-.year-input {
-  width: 80px;
-  padding: 8px;
-  font-size: 1rem;
-  text-align: center;
+.actions {
+  display: flex;
+  gap: 8px;
 }
 
-.date-input {
-  padding: 8px;
-  font-size: 1rem;
-}
-
-button {
-  padding: 8px 12px;
-  background-color: #42b983;
+.delete-btn {
+  background: #e74c3c;
   color: white;
   border: none;
-  cursor: pointer;
-  border-radius: 6px;
-}
-
-.hint {
-  color: #888;
-  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 4px;
 }
 </style>
