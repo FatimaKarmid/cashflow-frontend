@@ -105,7 +105,7 @@ export default {
 
     fetchExpenses() {
       const BASE_URL=import.meta.env.VITE_API_URL
-      fetch("${API_URL}/auszahlungen")
+      fetch(`${API_URL}/auszahlungen`)
           .then(res => res.json())
           .then(data => (this.expenses = data));
     },
