@@ -82,6 +82,7 @@
 </template>
 
 <script>
+const API_URL = import.meta.env.VITE_API_URL;
 export default {
   name: "AusgabeHinzufuegen",
 
@@ -105,7 +106,7 @@ export default {
       this.error = null;
       this.loading = true;
 
-      fetch("https://cashflow-6.onrender.com/auszahlungen", {
+      fetch("${API_URL}/auszahlungen", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

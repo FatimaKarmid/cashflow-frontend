@@ -67,7 +67,7 @@
 <script>
 import { Chart } from "chart.js/auto";
 
-const BASE_URL=import.meta.env.VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL;
 
 
 export default {
@@ -106,7 +106,7 @@ export default {
       }
 
       fetch(
-          `${BASE_URL}/auszahlungen/summe?datum=${this.selectedDate}`
+          `${API_URL}/auszahlungen/summe?datum=${this.selectedDate}`
       )
           .then(res => res.json())
           .then(data => {
@@ -123,7 +123,7 @@ export default {
       this.chartDataLoaded = false;
 
       fetch(
-          `${BASE_URL}/auszahlungen/summe-monat?monat=${this.monat}&jahr=${this.jahr}`
+          `${API_URL}/auszahlungen/summe-monat?monat=${this.monat}&jahr=${this.jahr}`
       )
           .then(res => res.json())
           .then(data => {
@@ -131,7 +131,7 @@ export default {
           });
 
       fetch(
-          `${BASE_URL}/auszahlungen/chart?monat=${this.monat}&jahr=${this.jahr}`
+          `${API_URL}/auszahlungen/chart?monat=${this.monat}&jahr=${this.jahr}`
       )
           .then(res => res.json())
           .then(data => {

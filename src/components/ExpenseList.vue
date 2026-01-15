@@ -75,6 +75,8 @@
 </template>
 
 <script>
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default {
   name: "AusgabenListe",
 
@@ -102,7 +104,8 @@ export default {
     },
 
     fetchExpenses() {
-      fetch("https://cashflow-6.onrender.com/auszahlungen")
+      const BASE_URL=import.meta.env.VITE_API_URL
+      fetch("${API_URL}/auszahlungen")
           .then(res => res.json())
           .then(data => (this.expenses = data));
     },
@@ -114,7 +117,7 @@ export default {
       if (this.selectedDate) params.append("datum", this.selectedDate);
       if (this.searchName) params.append("name", this.searchName);
 
-      fetch(`https://cashflow-6.onrender.com/auszahlungen/filter?${params}`)
+      fetch(`${API_URL}/auszahlungen/filter?${params}`)
           .then(res => res.json())
           .then(data => (this.expenses = data));
     },
@@ -127,7 +130,7 @@ export default {
     },
 
     deleteTransaction(id) {
-      fetch(`https://cashflow-6.onrender.com/auszahlungen/${id}`, {
+      fetch(`${API_URL}/auszahlungen/${id}`, {
         method: "DELETE"
       }).then(() => this.applyFilter());
     },
@@ -138,7 +141,7 @@ export default {
     },
 
     saveEdit() {
-      fetch(`https://cashflow-6.onrender.com/auszahlungen/${this.editId}`, {
+      fetch(`${API_URL}/auszahlungen/${this.editId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(this.editExpense)
