@@ -103,13 +103,20 @@ export default {
           : "—";
     },
 
+    // Lädt alle Ausgaben
     fetchExpenses() {
-      const BASE_URL=import.meta.env.VITE_API_URL
       fetch(`${API_URL}/auszahlungen`)
           .then(res => res.json())
-          .then(data => (this.expenses = data));
+          .then(data => {
+            this.expenses = data;
+          })
+          .catch(err => {
+            console.error("Fehler beim Laden der Ausgaben:", err);
+            this.expenses = [];
+          });
     },
 
+    // Wendet die Filter an
     applyFilter() {
       const params = new URLSearchParams();
 
@@ -119,9 +126,19 @@ export default {
 
       fetch(`${API_URL}/auszahlungen/filter?${params}`)
           .then(res => res.json())
-          .then(data => (this.expenses = data));
+          .then(data => {
+            this.expenses = data;
+            if (data.length === 0) {
+              alert("Keine Ausgaben gefunden.");
+            }
+          })
+          .catch(err => {
+            console.error("Fehler beim Anwenden des Filters:", err);
+            this.expenses = [];
+          });
     },
 
+    // Setzt alle Filter zurück und lädt alle Ausgaben erneut
     resetFilter() {
       this.selectedKategorie = "";
       this.selectedDate = "";
@@ -129,26 +146,39 @@ export default {
       this.fetchExpenses();
     },
 
+    // Löscht eine Transaktion
     deleteTransaction(id) {
       fetch(`${API_URL}/auszahlungen/${id}`, {
         method: "DELETE"
-      }).then(() => this.applyFilter());
+      })
+          .then(() => {
+            this.expenses = this.expenses.filter(expense => expense.id !== id);
+          })
+          .catch(err => {
+            console.error("Fehler beim Löschen der Transaktion:", err);
+          });
     },
 
+    // Startet den Bearbeitungsmodus
     startEdit(expense) {
       this.editId = expense.id;
       this.editExpense = { ...expense };
     },
 
+    // Speichert die bearbeiteten Daten
     saveEdit() {
       fetch(`${API_URL}/auszahlungen/${this.editId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(this.editExpense)
-      }).then(() => {
-        this.editId = null;
-        this.fetchExpenses();
-      });
+      })
+          .then(() => {
+            this.editId = null;
+            this.fetchExpenses();
+          })
+          .catch(err => {
+            console.error("Fehler beim Speichern der Änderungen:", err);
+          });
     }
   }
 };

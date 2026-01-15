@@ -69,7 +69,6 @@ import { Chart } from "chart.js/auto";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-
 export default {
   name: "Dashboard",
 
@@ -88,7 +87,7 @@ export default {
   },
 
   mounted() {
-    this.loadMonatDaten();
+    this.loadMonatDaten(); // lädt die monatliche Summe bei der Initialisierung
   },
 
   methods: {
@@ -99,57 +98,66 @@ export default {
           .replace(/\b\w/g, c => c.toUpperCase());
     },
 
+    // Lädt die Summe der Ausgaben für den ausgewählten Tag
     loadTagSumme() {
       if (!this.selectedDate) {
         this.tagSumme = 0;
         return;
       }
 
-      fetch(
-          `${API_URL}/auszahlungen/summe?datum=${this.selectedDate}`
-      )
+      fetch(`${API_URL}/auszahlungen/summe?datum=${this.selectedDate}`)
           .then(res => res.json())
           .then(data => {
             this.tagSumme = data;
           })
-          .catch(() => {
+          .catch(err => {
+            console.error("Fehler beim Laden der Tagesausgaben:", err);
             this.tagSumme = 0;
           });
     },
 
+    // Lädt die Summe der Ausgaben und das Diagramm für den gewählten Monat/Jahr
     loadMonatDaten() {
-      if (!this.monat || !this.jahr) return;
+      if (!this.monat || !this.jahr) {
+        console.error("Ungültiger Monat oder Jahr");
+        return;
+      }
 
       this.chartDataLoaded = false;
 
-      fetch(
-          `${API_URL}/auszahlungen/summe-monat?monat=${this.monat}&jahr=${this.jahr}`
-      )
+      // Monatliche Summe der Ausgaben
+      fetch(`${API_URL}/auszahlungen/summe-monat?monat=${this.monat}&jahr=${this.jahr}`)
           .then(res => res.json())
           .then(data => {
             this.monatSumme = data;
+          })
+          .catch(err => {
+            console.error("Fehler beim Laden der Monatsausgaben:", err);
+            this.monatSumme = 0;
           });
 
-      fetch(
-          `${API_URL}/auszahlungen/chart?monat=${this.monat}&jahr=${this.jahr}`
-      )
+      // Diagrammdaten für den Monat
+      fetch(`${API_URL}/auszahlungen/chart?monat=${this.monat}&jahr=${this.jahr}`)
           .then(res => res.json())
           .then(data => {
             this.loadChart(data);
             this.chartDataLoaded = true;
           })
-          .catch(() => {
+          .catch(err => {
+            console.error("Fehler beim Laden der Diagrammdaten:", err);
             this.chartDataLoaded = false;
           });
     },
 
+    // Lädt das Diagramm basierend auf den erhaltenen Daten
     loadChart(data) {
       const ctx = this.$refs.chart;
 
       if (this.chart) {
-        this.chart.destroy();
+        this.chart.destroy(); // Zerstört das alte Diagramm, um ein neues zu erstellen
       }
 
+      // Neues Diagramm erstellen
       this.chart = new Chart(ctx, {
         type: "pie",
         data: {
@@ -199,7 +207,7 @@ export default {
   background: white;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 .amount {

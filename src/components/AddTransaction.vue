@@ -82,7 +82,8 @@
 </template>
 
 <script>
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;  // Korrekte URL-Definition
+
 export default {
   name: "AusgabeHinzufuegen",
 
@@ -106,7 +107,8 @@ export default {
       this.error = null;
       this.loading = true;
 
-      fetch("${API_URL}/auszahlungen", {
+      // API-Aufruf an die korrekte URL zusammengebaut
+      fetch(`${API_URL}/auszahlungen`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
