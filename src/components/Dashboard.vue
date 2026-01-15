@@ -67,6 +67,9 @@
 <script>
 import { Chart } from "chart.js/auto";
 
+const BASE_URL=import.meta.env.VITE_API_URL
+
+
 export default {
   name: "Dashboard",
 
@@ -103,7 +106,7 @@ export default {
       }
 
       fetch(
-          `https://cashflow-6.onrender.com/auszahlungen/summe?datum=${this.selectedDate}`
+          `${BASE_URL}/auszahlungen/summe?datum=${this.selectedDate}`
       )
           .then(res => res.json())
           .then(data => {
@@ -120,7 +123,7 @@ export default {
       this.chartDataLoaded = false;
 
       fetch(
-          `https://cashflow-6.onrender.com/auszahlungen/summe-monat?monat=${this.monat}&jahr=${this.jahr}`
+          `${BASE_URL}/auszahlungen/summe-monat?monat=${this.monat}&jahr=${this.jahr}`
       )
           .then(res => res.json())
           .then(data => {
@@ -128,7 +131,7 @@ export default {
           });
 
       fetch(
-          `https://cashflow-6.onrender.com/auszahlungen/chart?monat=${this.monat}&jahr=${this.jahr}`
+          `${BASE_URL}/auszahlungen/chart?monat=${this.monat}&jahr=${this.jahr}`
       )
           .then(res => res.json())
           .then(data => {
