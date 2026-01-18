@@ -32,8 +32,8 @@
       </button>
     </div>
 
-    <!-- LISTE -->
-    <ul>
+    <!-- LISTE (NUR wenn Daten existieren) -->
+    <ul v-if="expenses.length > 0">
       <li
           v-for="expense in expenses"
           :key="expense.id"
@@ -99,25 +99,31 @@ export default {
   methods: {
     beautify(value) {
       return value
-          ? value.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+          ? value
+              .toLowerCase()
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, c => c.toUpperCase())
           : "—";
     },
 
-    //  Alle Ausgaben laden
+    // Alle Ausgaben
     fetchExpenses() {
+      this.expenses = [];
+
       fetch(`${API_URL}/auszahlungen`)
           .then(res => res.json())
           .then(data => {
             this.expenses = data;
           })
-          .catch(err => {
-            console.error("Fehler beim Laden:", err);
+          .catch(() => {
             this.expenses = [];
           });
     },
 
-    //  Zentrale Filterfunktion (alle Kombinationen)
+    // ZENTRALER FILTER (alle Kombinationen)
     applyFilter() {
+      this.expenses = []; // 🔴 WICHTIG: verhindert Ghost-UI
+
       const params = new URLSearchParams();
 
       if (this.searchName) params.append("name", this.searchName);
@@ -129,13 +135,11 @@ export default {
           .then(data => {
             this.expenses = data;
           })
-          .catch(err => {
-            console.error("Fehler beim Filtern:", err);
+          .catch(() => {
             this.expenses = [];
           });
     },
 
-    //  Reset
     resetFilter() {
       this.searchName = "";
       this.selectedKategorie = "";
@@ -143,37 +147,27 @@ export default {
       this.fetchExpenses();
     },
 
-    //  Delete
     deleteTransaction(id) {
       fetch(`${API_URL}/auszahlungen/${id}`, { method: "DELETE" })
           .then(() => {
             this.expenses = this.expenses.filter(e => e.id !== id);
-          })
-          .catch(err => {
-            console.error("Fehler beim Löschen:", err);
           });
     },
 
-    //  Edit
     startEdit(expense) {
       this.editId = expense.id;
       this.editExpense = { ...expense };
     },
 
-    //  Save
     saveEdit() {
       fetch(`${API_URL}/auszahlungen/${this.editId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(this.editExpense)
-      })
-          .then(() => {
-            this.editId = null;
-            this.fetchExpenses();
-          })
-          .catch(err => {
-            console.error("Fehler beim Speichern:", err);
-          });
+      }).then(() => {
+        this.editId = null;
+        this.fetchExpenses();
+      });
     }
   }
 };
