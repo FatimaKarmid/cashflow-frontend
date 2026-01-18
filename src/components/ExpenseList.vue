@@ -130,7 +130,7 @@ export default {
           this.selectedKategorie ||
           this.selectedDate;
 
-      // Formatierung des Datums im richtigen ISO-Format (yyyy-MM-dd)
+      // Wenn das Datum vorhanden ist, formatieren wir es in das ISO-Format yyyy-MM-dd
       if (this.selectedDate) {
         const isValidDate = this.isValidDate(this.selectedDate);
         if (!isValidDate) {
@@ -138,7 +138,7 @@ export default {
           this.selectedDate = null;
         } else {
           // Konvertiere das Datum in das richtige Format (yyyy-MM-dd)
-          this.selectedDate = this.selectedDate.split('.').reverse().join('-');
+          this.selectedDate = this.selectedDate.split('.').reverse().join('-'); // Umwandlung für "18.01.2026" -> "2026-01-18"
         }
       }
 
@@ -160,7 +160,7 @@ export default {
       }
 
       if (this.selectedDate) {
-        params.append("datum", this.selectedDate);
+        params.append("datum", this.selectedDate); // Datum im richtigen Format an den Backend senden
       }
 
       fetch(`${API_URL}/auszahlungen/filter?${params}`)
