@@ -7,7 +7,7 @@
       <label>Name:</label>
       <input
           type="text"
-          v-model.trim="searchName"
+          v-model="searchName"
           placeholder="Suchen..."
           @input="applyFilter"
       />
@@ -25,20 +25,15 @@
       </select>
 
       <label>Datum:</label>
-      <!-- lazy = erst setzen, wenn der User wirklich fertig ist -->
-      <input
-          type="date"
-          v-model.lazy="selectedDate"
-          @change="applyFilter"
-      />
+      <input type="date" v-model="selectedDate" @change="applyFilter" />
 
       <button class="reset-btn" @click="resetFilter">
         Zurücksetzen
       </button>
     </div>
 
-    <!-- LISTE -->
-    <ul v-if="expenses.length">
+    <!-- LISTE (NUR wenn Daten existieren) -->
+    <ul v-if="expenses.length > 0">
       <li
           v-for="expense in expenses"
           :key="expense.id"
@@ -56,8 +51,8 @@
 
         <!-- EDIT -->
         <div v-else>
-          <input v-model.trim="editExpense.name" />
-          <input type="number" min="0.01" step="0.01" v-model.number="editExpense.betrag" />
+          <input v-model="editExpense.name" />
+          <input type="number" v-model.number="editExpense.betrag" />
           <input type="date" v-model="editExpense.datum" />
         </div>
 
@@ -78,7 +73,8 @@
       </li>
     </ul>
 
-    <p v-else>Keine Ausgaben gefunden.</p>
+    <!-- Keine Ergebnisse -->
+    <p v-else>Keine Ausgaben gefunden, die den Filterkriterien entsprechen.</p>
   </div>
 </template>
 
@@ -92,7 +88,7 @@ export default {
     return {
       expenses: [],
       selectedKategorie: "",
-      selectedDate: null,
+      selectedDate: "",
       searchName: "",
       editId: null,
       editExpense: {}
@@ -106,22 +102,43 @@ export default {
   methods: {
     beautify(value) {
       return value
-          ? value.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+          ? value
+              .toLowerCase()
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, c => c.toUpperCase())
           : "—";
     },
 
+    // Alle Ausgaben
     fetchExpenses() {
+      this.expenses = [];
+
       fetch(`${API_URL}/auszahlungen`)
           .then(res => res.json())
-          .then(data => (this.expenses = data))
-          .catch(() => (this.expenses = []));
+          .then(data => {
+            this.expenses = data;
+          })
+          .catch(() => {
+            this.expenses = [];
+          });
     },
 
+    // ZENTRALER FILTER (alle Kombinationen)
     applyFilter() {
+      const hasFilter =
+          this.searchName.trim() ||
+          this.selectedKategorie ||
+          this.selectedDate;
+
+      if (!hasFilter) {
+        this.fetchExpenses();
+        return;
+      }
+
       const params = new URLSearchParams();
 
-      if (this.searchName) {
-        params.append("name", this.searchName);
+      if (this.searchName.trim()) {
+        params.append("name", this.searchName.trim());
       }
 
       if (this.selectedKategorie) {
@@ -132,22 +149,27 @@ export default {
         params.append("datum", this.selectedDate);
       }
 
-      // KEIN Filter → alles laden
-      if ([...params].length === 0) {
-        this.fetchExpenses();
-        return;
-      }
-
-      fetch(`${API_URL}/auszahlungen/filter?${params.toString()}`)
+      fetch(`${API_URL}/auszahlungen/filter?${params}`)
           .then(res => res.json())
-          .then(data => (this.expenses = data))
-          .catch(() => (this.expenses = []));
+          .then(data => {
+            this.expenses = data;
+          })
+          .catch(() => {
+            this.expenses = [];
+          });
+    }
+    ,
+
+    // Datum validieren (YYYY-MM-DD Format)
+    isValidDate(date) {
+      const regex = /^\d{4}-\d{2}-\d{2}$/;
+      return date.match(regex) !== null;
     },
 
     resetFilter() {
       this.searchName = "";
       this.selectedKategorie = "";
-      this.selectedDate = null;
+      this.selectedDate = "";
       this.fetchExpenses();
     },
 
@@ -176,3 +198,39 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.expense-item {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  margin-bottom: 12px;
+  padding: 14px;
+  border-radius: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.delete-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+</style>

@@ -207,7 +207,7 @@
       <workItem from="1767900042338" duration="8200000" />
       <workItem from="1768302627108" duration="4598000" />
       <workItem from="1768392537965" duration="24252000" />
-      <workItem from="1768755920992" duration="2508000" />
+      <workItem from="1768755920992" duration="3241000" />
     </task>
     <task id="LOCAL-00001" summary="App vue">
       <option name="closed" value="true" />
@@ -481,7 +481,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768757611366</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="Final abgabe">
+      <option name="closed" value="true" />
+      <created>1768758589293</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1768758589293</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
