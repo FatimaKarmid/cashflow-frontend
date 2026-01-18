@@ -122,13 +122,32 @@ export default {
 
     // ZENTRALER FILTER (alle Kombinationen)
     applyFilter() {
-      this.expenses = []; // 🔴 WICHTIG: verhindert Ghost-UI
+      const hasFilter =
+          this.searchName.trim() ||
+          this.selectedKategorie ||
+          this.selectedDate;
+
+      //  KEIN Filter → ALLE laden
+      if (!hasFilter) {
+        this.fetchExpenses();
+        return;
+      }
+
+      this.expenses = [];
 
       const params = new URLSearchParams();
 
-      if (this.searchName) params.append("name", this.searchName);
-      if (this.selectedKategorie) params.append("kategorie", this.selectedKategorie);
-      if (this.selectedDate) params.append("datum", this.selectedDate);
+      if (this.searchName.trim()) {
+        params.append("name", this.searchName.trim());
+      }
+
+      if (this.selectedKategorie) {
+        params.append("kategorie", this.selectedKategorie);
+      }
+
+      if (this.selectedDate) {
+        params.append("datum", this.selectedDate);
+      }
 
       fetch(`${API_URL}/auszahlungen/filter?${params}`)
           .then(res => res.json())
@@ -138,7 +157,8 @@ export default {
           .catch(() => {
             this.expenses = [];
           });
-    },
+    }
+    ,
 
     resetFilter() {
       this.searchName = "";
