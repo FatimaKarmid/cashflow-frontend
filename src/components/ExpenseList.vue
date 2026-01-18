@@ -130,15 +130,18 @@ export default {
           this.selectedKategorie ||
           this.selectedDate;
 
-      // Validierung des Datumsformats
+      // Formatierung des Datums im richtigen ISO-Format (yyyy-MM-dd)
       if (this.selectedDate) {
         const isValidDate = this.isValidDate(this.selectedDate);
         if (!isValidDate) {
+          alert("Das Datum ist ungültig. Bitte wählen Sie ein gültiges Datum.");
           this.selectedDate = null;
+        } else {
+          // Konvertiere das Datum in das richtige Format (yyyy-MM-dd)
+          this.selectedDate = this.selectedDate.split('.').reverse().join('-');
         }
       }
 
-      // KEIN Filter → ALLE laden
       if (!hasFilter) {
         this.fetchExpenses();
         return;
@@ -168,7 +171,8 @@ export default {
           .catch(() => {
             this.expenses = [];
           });
-    },
+    }
+    ,
 
     // Datum validieren (YYYY-MM-DD Format)
     isValidDate(date) {
