@@ -25,7 +25,7 @@
       </select>
 
       <label>Datum:</label>
-      <!-- 🔴 WICHTIG: lazy -->
+      <!-- lazy verhindert Zwischenzustände -->
       <input
           type="date"
           v-model.lazy="selectedDate"
@@ -57,7 +57,12 @@
         <!-- EDIT -->
         <div v-else>
           <input v-model.trim="editExpense.name" />
-          <input type="number" min="0.01" step="0.01" v-model.number="editExpense.betrag" />
+          <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              v-model.number="editExpense.betrag"
+          />
           <input type="date" v-model="editExpense.datum" />
         </div>
 
@@ -92,7 +97,7 @@ export default {
     return {
       expenses: [],
       selectedKategorie: "",
-      selectedDate: null,
+      selectedDate: null,   // wichtig: null statt ""
       searchName: "",
       editId: null,
       editExpense: {}
@@ -106,15 +111,22 @@ export default {
   methods: {
     beautify(value) {
       return value
-          ? value.toLowerCase().replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+          ? value
+              .toLowerCase()
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, c => c.toUpperCase())
           : "—";
     },
 
     fetchExpenses() {
       fetch(`${API_URL}/auszahlungen`)
           .then(res => res.json())
-          .then(data => (this.expenses = data))
-          .catch(() => (this.expenses = []));
+          .then(data => {
+            this.expenses = data;
+          })
+          .catch(() => {
+            this.expenses = [];
+          });
     },
 
     applyFilter() {
@@ -129,10 +141,11 @@ export default {
       }
 
       if (this.selectedDate) {
+        // ISO-Format YYYY-MM-DD → passt zu Spring LocalDate
         params.append("datum", this.selectedDate);
       }
 
-      // Kein Filter → alle laden
+      // kein Filter aktiv → alles laden
       if ([...params].length === 0) {
         this.fetchExpenses();
         return;
@@ -140,8 +153,12 @@ export default {
 
       fetch(`${API_URL}/auszahlungen/filter?${params.toString()}`)
           .then(res => res.json())
-          .then(data => (this.expenses = data))
-          .catch(() => (this.expenses = []));
+          .then(data => {
+            this.expenses = data;
+          })
+          .catch(() => {
+            this.expenses = [];
+          });
     },
 
     resetFilter() {
