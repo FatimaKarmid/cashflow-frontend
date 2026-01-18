@@ -72,6 +72,9 @@
         </div>
       </li>
     </ul>
+
+    <!-- Keine Ergebnisse -->
+    <p v-else>Keine Ausgaben gefunden, die den Filterkriterien entsprechen.</p>
   </div>
 </template>
 
@@ -127,7 +130,15 @@ export default {
           this.selectedKategorie ||
           this.selectedDate;
 
-      //  KEIN Filter → ALLE laden
+      // Validierung des Datumsformats
+      if (this.selectedDate) {
+        const isValidDate = this.isValidDate(this.selectedDate);
+        if (!isValidDate) {
+          this.selectedDate = null;
+        }
+      }
+
+      // KEIN Filter → ALLE laden
       if (!hasFilter) {
         this.fetchExpenses();
         return;
@@ -157,8 +168,13 @@ export default {
           .catch(() => {
             this.expenses = [];
           });
-    }
-    ,
+    },
+
+    // Datum validieren (YYYY-MM-DD Format)
+    isValidDate(date) {
+      const regex = /^\d{4}-\d{2}-\d{2}$/;
+      return date.match(regex) !== null;
+    },
 
     resetFilter() {
       this.searchName = "";
