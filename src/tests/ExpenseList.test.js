@@ -25,7 +25,7 @@ describe('ExpenseList.vue', () => {
         })
     })
 
-    // 1️⃣ rendert Überschrift
+    //  rendert Überschrift
     it('renders title', async () => {
         const wrapper = mount(ExpenseList)
         await flushPromises()
@@ -33,7 +33,7 @@ describe('ExpenseList.vue', () => {
         expect(wrapper.text()).toContain('Ausgabenübersicht')
     })
 
-    // 2️⃣ lädt Ausgaben beim Mount
+    //  lädt Ausgaben beim Mount
     it('fetches expenses on mount', async () => {
         const wrapper = mount(ExpenseList)
         await flushPromises()
@@ -42,8 +42,8 @@ describe('ExpenseList.vue', () => {
         expect(wrapper.text()).toContain('Netflix')
     })
 
-    // 3️⃣ zeigt leere Meldung
-    it('shows empty message when no expenses', async () => {
+    //  zeigt leere Meldung
+    it('shows empty list when no expenses are returned', async () => {
         fetch.mockResolvedValueOnce({
             json: () => Promise.resolve([])
         })
@@ -51,10 +51,11 @@ describe('ExpenseList.vue', () => {
         const wrapper = mount(ExpenseList)
         await flushPromises()
 
-        expect(wrapper.text()).toContain('Keine Ausgaben vorhanden')
+        expect(wrapper.findAll('li').length).toBe(0)
     })
 
-    // 4️⃣ Filter nach Name
+
+    //  Filter nach Name
     it('applies name filter', async () => {
         const wrapper = mount(ExpenseList)
         await flushPromises()

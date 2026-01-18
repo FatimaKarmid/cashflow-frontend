@@ -11,7 +11,7 @@ describe('AddTransaction.vue', () => {
         vi.clearAllMocks()
     })
 
-    // 7️⃣ rendert Formular
+    //  rendert Formular
     it('renders form', () => {
         const wrapper = mount(AddTransaction)
 
@@ -19,7 +19,7 @@ describe('AddTransaction.vue', () => {
         expect(wrapper.text()).toContain('Neue Ausgabe hinzufügen')
     })
 
-    // 8️⃣ sendet POST bei Submit
+    //  sendet POST bei Submit
     it('submits transaction', async () => {
         fetch.mockResolvedValueOnce({
             ok: true,
@@ -44,7 +44,7 @@ describe('AddTransaction.vue', () => {
         )
     })
 
-    // 9️⃣ zeigt Fehlermeldung bei Fehler
+    //  zeigt Fehlermeldung bei Fehler
     it('shows error on failed submit', async () => {
         fetch.mockResolvedValueOnce({
             ok: false,

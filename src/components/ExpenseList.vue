@@ -33,16 +33,19 @@
     </div>
 
     <!-- LISTE -->
-    <ul v-if="expenses.length">
-      <li v-for="expense in expenses" :key="expense.id" class="expense-item">
-
+    <ul>
+      <li
+          v-for="expense in expenses"
+          :key="expense.id"
+          class="expense-item"
+      >
         <!-- VIEW -->
         <div v-if="editId !== expense.id">
-          <strong>💰 {{ expense.betrag }} €</strong><br>
-          Name: {{ expense.name }}<br>
-          Kategorie: {{ beautify(expense.verwendungszweck) }}<br>
-          Zahlungsart: {{ beautify(expense.zahlungsart) }}<br>
-          Datum: {{ expense.datum }}<br>
+          <strong>💰 {{ expense.betrag }} €</strong><br />
+          Name: {{ expense.name }}<br />
+          Kategorie: {{ beautify(expense.verwendungszweck) }}<br />
+          Zahlungsart: {{ beautify(expense.zahlungsart) }}<br />
+          Datum: {{ expense.datum }}<br />
           <span v-if="expense.notiz">Notiz: {{ expense.notiz }}</span>
         </div>
 
@@ -69,8 +72,6 @@
         </div>
       </li>
     </ul>
-
-    <p v-else>Keine Ausgaben vorhanden.</p>
   </div>
 </template>
 
@@ -86,7 +87,6 @@ export default {
       selectedKategorie: "",
       selectedDate: "",
       searchName: "",
-
       editId: null,
       editExpense: {}
     };
@@ -103,7 +103,7 @@ export default {
           : "—";
     },
 
-    // Lädt alle Ausgaben
+    //  Alle Ausgaben laden
     fetchExpenses() {
       fetch(`${API_URL}/auszahlungen`)
           .then(res => res.json())
@@ -111,61 +111,56 @@ export default {
             this.expenses = data;
           })
           .catch(err => {
-            console.error("Fehler beim Laden der Ausgaben:", err);
+            console.error("Fehler beim Laden:", err);
             this.expenses = [];
           });
     },
 
-    // Wendet die Filter an
+    //  Zentrale Filterfunktion (alle Kombinationen)
     applyFilter() {
       const params = new URLSearchParams();
 
+      if (this.searchName) params.append("name", this.searchName);
       if (this.selectedKategorie) params.append("kategorie", this.selectedKategorie);
       if (this.selectedDate) params.append("datum", this.selectedDate);
-      if (this.searchName) params.append("name", this.searchName);
 
       fetch(`${API_URL}/auszahlungen/filter?${params}`)
           .then(res => res.json())
           .then(data => {
             this.expenses = data;
-            if (data.length === 0) {
-              alert("Keine Ausgaben gefunden.");
-            }
           })
           .catch(err => {
-            console.error("Fehler beim Anwenden des Filters:", err);
+            console.error("Fehler beim Filtern:", err);
             this.expenses = [];
           });
     },
 
-    // Setzt alle Filter zurück und lädt alle Ausgaben erneut
+    //  Reset
     resetFilter() {
+      this.searchName = "";
       this.selectedKategorie = "";
       this.selectedDate = "";
-      this.searchName = "";
       this.fetchExpenses();
     },
 
-    // Löscht eine Transaktion
+    //  Delete
     deleteTransaction(id) {
-      fetch(`${API_URL}/auszahlungen/${id}`, {
-        method: "DELETE"
-      })
+      fetch(`${API_URL}/auszahlungen/${id}`, { method: "DELETE" })
           .then(() => {
-            this.expenses = this.expenses.filter(expense => expense.id !== id);
+            this.expenses = this.expenses.filter(e => e.id !== id);
           })
           .catch(err => {
-            console.error("Fehler beim Löschen der Transaktion:", err);
+            console.error("Fehler beim Löschen:", err);
           });
     },
 
-    // Startet den Bearbeitungsmodus
+    //  Edit
     startEdit(expense) {
       this.editId = expense.id;
       this.editExpense = { ...expense };
     },
 
-    // Speichert die bearbeiteten Daten
+    //  Save
     saveEdit() {
       fetch(`${API_URL}/auszahlungen/${this.editId}`, {
         method: "PUT",
@@ -177,7 +172,7 @@ export default {
             this.fetchExpenses();
           })
           .catch(err => {
-            console.error("Fehler beim Speichern der Änderungen:", err);
+            console.error("Fehler beim Speichern:", err);
           });
     }
   }
